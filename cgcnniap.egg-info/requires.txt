@@ -1,5 +1,0 @@
-pymatgen
-ase
-torch
-numpy
-sklearn

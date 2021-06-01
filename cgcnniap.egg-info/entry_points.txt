@@ -1,4 +1,0 @@
-[console_scripts]
-cgcnn-iap-predict = cgcnniap.command_line_predict:main
-cgcnn-iap-train = cgcnniap.command_line_train:main
-
