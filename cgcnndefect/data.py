@@ -14,6 +14,7 @@ from pymatgen.core.structure import Structure
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
+from .util import ELEM_DICT
 
 
 def get_train_val_test_loader(dataset, collate_fn=default_collate,
@@ -466,7 +467,7 @@ class CIFData(Dataset):
         # Base structure information
         crystal = Structure.from_file(os.path.join(self.root_dir,
                                                    cif_id+'.cif'))
-        all_atom_types = [crystal[i].specie.number for i in range(len(crystal))]
+        all_atom_types = [ELEM_DICT[crystal[i].specie.symbol] for i in range(len(crystal))]
         all_nbrs = crystal.get_all_neighbors_old(self.radius, include_index=True)
 
 

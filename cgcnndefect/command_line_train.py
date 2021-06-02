@@ -167,13 +167,11 @@ def main():
     structures, _, _, _ = dataset[0]
     orig_atom_fea_len = structures[0].shape[-1]
     nbr_fea_len = structures[1].shape[-1]
-    print(len(structures))
     if args.crys_spec is not None:
         global_fea_len = len(structures[7])
     else:
         global_fea_len = 0
 
-    print(global_fea_len)
     model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
                                 atom_fea_len=args.atom_fea_len,
                                 n_conv=args.n_conv,
@@ -226,7 +224,8 @@ def main():
 
     # Pickle the CIFData object so the exact same settings
     # can be used in predict mode
-    pickle.dump(dataset, open('dataset.pth.tar','wb'))
+    with open('dataset.pth.tar','wb') as f:
+        pickle.dump(dataset, f) 
 
     f = open(os.path.join(args.resultdir,"train.log"),"w")
 

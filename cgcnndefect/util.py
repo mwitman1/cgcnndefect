@@ -3,6 +3,23 @@ import shutil
 import numpy as np
 import torch
 from sklearn import metrics
+from pymatgen.core.periodic_table import Element
+
+ATOMIC_NUMBER = [
+    "X", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg",
+    "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn",
+    "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb",
+    "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In",
+    "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm",
+    "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta",
+    "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At",
+    "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk",
+    "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt",
+    "Ds", "Rg", "Cn"]
+elem_lst = [Element(ATOMIC_NUMBER[i]) for i in range(1,len(ATOMIC_NUMBER))]
+ELEM_DICT = dict([(el.symbol,el.Z ) for el in elem_lst])
+ELEM_DICT['X'] = 0
+print(ELEM_DICT)
 
 class Normalizer(object):
     """Normalize a Tensor and restore it later. """
