@@ -90,6 +90,16 @@ parser.add_argument('--resultdir', default='.', type=str, metavar='N',
 parser.add_argument('--jit', action='store_true',
                     help='Create a serialized Troch script')
 
+parser.add_argument('--crys-spec', default=None, type=str, metavar='N',
+                    help='ext of file that contains global crystal '
+                         'features for each example (i.e. example.ext)'
+                         'Features are concatenated to the pooled crystal'
+                         'vector')
+parser.add_argument('--atom-spec', default=None, type=str, metavar='N',
+                    help='ext of file that contains atomic features '
+                         'specific for each example (i.e. example.ext)'
+                         'Features are concated to orig_atom_fea')
+
 
 args = parser.parse_args(sys.argv[1:])
 
@@ -110,8 +120,10 @@ def main():
     # load data
     print(args.task)
     dataset = CIFData(*args.data_options,
-                      args.task=='Fxyz',
-                      args.all_elems) #MW
+                      args.task=='Fxyz',          # MW
+                      args.all_elems,             # MW
+                      crys_spec = args.crys_spec, # MW
+                      atom_spec = args.atom_spec) # MW
     collate_fn = collate_pool
     train_loader, val_loader, test_loader = get_train_val_test_loader(
         dataset=dataset,
@@ -141,7 +153,8 @@ def main():
             sample_data_list = [dataset[i] for i in
                                 sample(range(len(dataset)), 500)]
         #_, sample_target, _ = collate_pool(sample_data_list) #<- Fxyz mod
-        _, sample_target, sample_target_Fxyz, _ = collate_pool(sample_data_list)
+        _, sample_target, sample_target_Fxyz, _ =\
+            collate_pool(sample_data_list)
         normalizer = Normalizer(sample_target)
         if args.task == 'Fxyz':
             raise NotImplemented("Forces not implemented yet")
@@ -154,6 +167,13 @@ def main():
     structures, _, _, _ = dataset[0]
     orig_atom_fea_len = structures[0].shape[-1]
     nbr_fea_len = structures[1].shape[-1]
+    print(len(structures))
+    if args.crys_spec is not None:
+        global_fea_len = len(structures[7])
+    else:
+        global_fea_len = 0
+
+    print(global_fea_len)
     model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
                                 atom_fea_len=args.atom_fea_len,
                                 n_conv=args.n_conv,
@@ -161,8 +181,9 @@ def main():
                                 n_h=args.n_h,
                                 classification=True if args.task ==
                                                        'classification' else False,
-                                Fxyz=True if args.task == 'Fxyz' else False,
-                                all_elems=args.all_elems)
+                                Fxyz=True if args.task == 'Fxyz' else False, #MW
+                                all_elems=args.all_elems, #MW
+                                global_fea_len=global_fea_len) #MW
     print("Number trainable params: %d"%sum(p.numel() for p in model.parameters() if p.requires_grad))
     #print(list(model.parameters()))
     #print([item.grad for item in list(model.parameters())])
@@ -303,14 +324,18 @@ def train(train_loader, model, criterion, optimizer, epoch,
                          Variable(input[1]),
                          input[2],
                          input[3],
-                         input[4],
-                         input[5],
-                         input[6],
-                         input[7])
-            crys_rep_ener = model.compute_repulsive_ener(input[3],
-                                                         input[4],
-                                                         input[5],
-                                                         input[6])
+                         input[4],  #MW
+                         input[5],  #MW
+                         input[6],  #MW
+                         input[7],  #MW
+                         input[8])#MW 
+            if args.all_elems != [0]:
+                crys_rep_ener = model.compute_repulsive_ener(input[3],
+                                                             input[4],
+                                                             input[5],
+                                                             input[6])
+            else:
+                crys_rep_ener = torch.zeros(target.shape)
         # normalize target
         if args.task == 'regression':
             target_normed = normalizer.norm(target-crys_rep_ener)
@@ -476,7 +501,8 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                              input[4], #MW
                              input[5], #MW
                              input[6], #MW
-                             input[7]) #MW
+                             input[7], #MW
+                             input[8]) #MW
                 crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                              input[4],
                                                              input[5],

@@ -97,7 +97,8 @@ class CrystalGraphConvNet(nn.Module):
     """
     def __init__(self, orig_atom_fea_len, nbr_fea_len,
                  atom_fea_len=64, n_conv=3, h_fea_len=128, n_h=1,
-                 classification=False, Fxyz=False, all_elems=[0]):
+                 classification=False, Fxyz=False, all_elems=[0],
+                 global_fea_len=0):
         """
         Initialize CrystalGraphConvNet.
 
@@ -116,6 +117,7 @@ class CrystalGraphConvNet(nn.Module):
           Number of hidden features after pooling
         n_h: int
           Number of hidden layers after pooling
+        
 
         Fxyz : bool
           Include forces as an additional training target
@@ -131,7 +133,7 @@ class CrystalGraphConvNet(nn.Module):
         self.convs = nn.ModuleList([ConvLayer(atom_fea_len=atom_fea_len,
                                     nbr_fea_len=nbr_fea_len)
                                     for _ in range(n_conv)])
-        self.conv_to_fc = nn.Linear(atom_fea_len, h_fea_len)
+        self.conv_to_fc = nn.Linear(atom_fea_len+global_fea_len, h_fea_len)
         self.conv_to_fc_softplus = nn.Softplus()
         if n_h > 1:
             self.fcs = nn.ModuleList([nn.Linear(h_fea_len, h_fea_len)
@@ -175,7 +177,8 @@ class CrystalGraphConvNet(nn.Module):
                       atom_type : torch.Tensor, 
                       nbr_type : torch.Tensor, 
                       nbr_dist : torch.Tensor, 
-                      pair_type : torch.Tensor) -> List[torch.Tensor]:
+                      pair_type : torch.Tensor,
+                      global_fea : torch.Tensor) -> List[torch.Tensor]:
         """
         Forward pass
 
@@ -224,7 +227,9 @@ class CrystalGraphConvNet(nn.Module):
         #print(crys_fea.shape, " <- crys_fea post pooling")
         # >>> torch.Size([N0, atom_fea_len])
 
-        crys_fea = self.conv_to_fc(self.conv_to_fc_softplus(crys_fea))
+        crys_fea = self.conv_to_fc(\
+                    self.conv_to_fc_softplus(torch.cat([crys_fea,global_fea],dim=1))
+                   )
         #print(crys_fea.shape, "<- crys_fea conv_to_fc")
         # >>> torch.Size([N0, h_fea_len])
 
