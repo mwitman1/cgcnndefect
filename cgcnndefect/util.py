@@ -19,7 +19,6 @@ ATOMIC_NUMBER = [
 elem_lst = [Element(ATOMIC_NUMBER[i]) for i in range(1,len(ATOMIC_NUMBER))]
 ELEM_DICT = dict([(el.symbol,el.Z ) for el in elem_lst])
 ELEM_DICT['X'] = 0
-print(ELEM_DICT)
 
 class Normalizer(object):
     """Normalize a Tensor and restore it later. """
