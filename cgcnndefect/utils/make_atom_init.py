@@ -3,7 +3,20 @@
 import json
 import numpy as np
 from copy import deepcopy
+from matminer.featurizers.composition import ElementProperty
+import pandas as pd
 
+ATOMIC_NUMBER = [                                                               
+    "ZERO", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg",   
+    "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn",   
+    "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb",     
+    "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In",      
+    "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm",      
+    "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta",     
+    "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At",      
+    "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk",      
+    "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt",     
+    "Ds", "Rg", "Cn", "Uut", "Uuq", "Uup", "Uuh", "Uuo"]
 
 with open('atom_init.json.orig','r') as f:
     s = json.loads(f.read())
@@ -23,6 +36,15 @@ with open('atom_init.json.defect','w') as f:
     f.write(json.dumps(s1,sort_keys=True))
 
 # Type 2: TODO
-# possible elements are subset of periodic table, only feature is element id
+# each element now has TWO orig_atom_fea vectors
+# orig_atom_fea_contin and orig_atom_fea_disc
+df_elem = pd.DataFrame()
+df_elem["composition"] = ATOMIC_NUMBER[1:101]
+ep_feat = ElementProperty.from_preset(preset_name="magpie")
+df_elem = ep_feat.featurize_dataframe(df_elem, col_id="composition")
+print(df_elem)
+ 
 
+with open('atom_init.json.defect_multi','w') as f:
+    pass
 

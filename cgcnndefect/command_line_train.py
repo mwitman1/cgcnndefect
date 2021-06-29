@@ -502,10 +502,14 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                              input[6], #MW
                              input[7], #MW
                              input[8]) #MW
+            if args.all_elems != [0]:
                 crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                              input[4],
                                                              input[5],
                                                              input[6])
+            else:
+                crys_rep_ener = torch.zeros(target.shape)
+
         if args.task == 'regression':
             target_normed = normalizer.norm(target-crys_rep_ener)
             target_Fxyz_normed = None 
