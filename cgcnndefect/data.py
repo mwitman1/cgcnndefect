@@ -163,10 +163,14 @@ def collate_pool(dataset_list):
 
         # additional global crys features for each example
         batch_global_fea.append(global_fea) # MW
+
     try:
         stacked_Fxyz = torch.stack(batch_target_Fxyz, dim=0)
     except:
         stacked_Fxyz = None
+    #print(batch_global_fea)
+    #print(np.where([len(v)==2 for v in batch_global_fea]))
+    #print(np.array(batch_cif_ids)[np.where([len(v)==2 for v in batch_global_fea])[0]])
     return (torch.cat(batch_atom_fea, dim=0),
             torch.cat(batch_nbr_fea, dim=0),
             torch.cat(batch_nbr_fea_idx, dim=0),
@@ -391,7 +395,8 @@ class CIFData(Dataset):
                  step=0.2,
                  random_seed=123,
                  crys_spec = None,
-                 atom_spec = None):
+                 atom_spec = None,
+                 csv_ext = ''):
         self.root_dir = root_dir
         self.Fxyz = Fxyz
         self.all_elems = all_elems
@@ -401,17 +406,26 @@ class CIFData(Dataset):
         self.random_seed = random_seed
         self.crys_spec = crys_spec
         self.atom_spec = atom_spec
+        self.csv_ext = csv_ext
         self.reload_data()
 
     def reload_data(self):
     
         assert os.path.exists(self.root_dir), 'root_dir does not exist!'
-        id_prop_file = os.path.join(self.root_dir, 'id_prop.csv')
+        id_prop_file = os.path.join(self.root_dir, 'id_prop.csv'+self.csv_ext)
         assert os.path.exists(id_prop_file), 'id_prop.csv does not exist!'
 
         with open(id_prop_file) as f:
             reader = csv.reader(f)
             self.id_prop_data = [row for row in reader]
+
+        random.seed(self.random_seed)
+        random.shuffle(self.id_prop_data)
+        atom_init_file = os.path.join(self.root_dir, 'atom_init.json')
+        assert os.path.exists(atom_init_file), 'atom_init.json does not exist!'
+        self.ari = AtomCustomJSONInitializer(atom_init_file)
+        #self.gdf = GaussianDistance(dmin=dmin, dmax=self.radius, step=step)
+        self.gdf = G2Descriptor(Rc=self.radius,large=True)
 
         # if forces requested
         if self.Fxyz:
@@ -432,14 +446,9 @@ class CIFData(Dataset):
               [np.loadtxt(os.path.join(self.root_dir,row[0]+"."+self.atom_spec))\
                for row in self.id_prop_data]
 
-        random.seed(self.random_seed)
-        random.shuffle(self.id_prop_data)
-        atom_init_file = os.path.join(self.root_dir, 'atom_init.json')
-        assert os.path.exists(atom_init_file), 'atom_init.json does not exist!'
-        self.ari = AtomCustomJSONInitializer(atom_init_file)
-        #self.gdf = GaussianDistance(dmin=dmin, dmax=self.radius, step=step)
-        self.gdf = G2Descriptor(Rc=self.radius,large=True)
-
+        # if a list of elements specified, assumes these are the only 
+        # elements that will be encountered (e.g. for interatomic potential
+        # and adds on to it the ZBL repulsive term later on
         if self.all_elems != [0]:
             pair_elems = list(itertools.combinations_with_replacement(\
                              sorted(self.all_elems),2))

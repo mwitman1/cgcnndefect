@@ -32,6 +32,18 @@ parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resultdir', default='.', type=str, metavar='N',
                         help='location to write test results')
+#parser.add_argument('--crys-spec', default=None, type=str, metavar='N',
+#                    help='ext of file that contains global crystal '
+#                         'features for each example (i.e. example.ext)'
+#                         'Features are concatenated to the pooled crystal'
+#                         'vector')
+#parser.add_argument('--atom-spec', default=None, type=str, metavar='N',
+#                    help='ext of file that contains atomic features '
+#                         'specific for each example (i.e. example.ext)'
+#                         'Features are concated to orig_atom_fea')
+parser.add_argument('--csv-ext', default='', type=str,
+                    help='id_prop.csv + csv-ext so that test sets can be manually '
+                         'specified without recopying all of the data in a diff folder')
 
 args = parser.parse_args(sys.argv[1:])
 if os.path.isfile(args.modelpath):
@@ -61,6 +73,10 @@ def main():
             dataset.reset_root(args.cifpath)
     else:
         dataset = CIFData(args.cifpath)
+    dataset.csv_ext = args.csv_ext
+    dataset.reload_data()
+    
+
     collate_fn = collate_pool
     test_loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True,
                              num_workers=args.workers, collate_fn=collate_fn,
@@ -70,9 +86,12 @@ def main():
     structures, _, _, _ = dataset[0] #<- Fxyz mod
     orig_atom_fea_len = structures[0].shape[-1]
     nbr_fea_len = structures[1].shape[-1]
-    # structures[0] = 
-    # print(structures[0].shape,structures[1].shape)
+    if model_args.crys_spec is not None:
+        global_fea_len = len(structures[7])
+    else:
+        global_fea_len = 0
     print("Potential applicable to: ", dataset.all_elems)
+
     model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
                                 atom_fea_len=model_args.atom_fea_len,
                                 n_conv=model_args.n_conv,
@@ -81,7 +100,8 @@ def main():
                                 classification=True if model_args.task ==
                                 'classification' else False,
                                 Fxyz=True if model_args.task == 'Fxyz' else False,
-                                all_elems=model_args.all_elems)
+                                all_elems=model_args.all_elems,
+                                global_fea_len=global_fea_len)
     if args.cuda:
         model.cuda()
 
@@ -162,8 +182,9 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                              input[4],
                              input[5],
                              input[6],
-                             input[7])
-                if args.all_elems != [0]:
+                             input[7],
+                             input[8])
+                if model_args.all_elems != [0]:
                     crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                                  input[4],
                                                                  input[5],

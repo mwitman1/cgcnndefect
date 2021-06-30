@@ -99,6 +99,9 @@ parser.add_argument('--atom-spec', default=None, type=str, metavar='N',
                     help='ext of file that contains atomic features '
                          'specific for each example (i.e. example.ext)'
                          'Features are concated to orig_atom_fea')
+parser.add_argument('--csv-ext', default='', type=str,
+                    help='id_prop.csv + csv-ext so that test sets can be manually '
+                         'specified without recopying all of the data in a diff folder')
 
 
 args = parser.parse_args(sys.argv[1:])
@@ -123,7 +126,8 @@ def main():
                       args.task=='Fxyz',          # MW
                       args.all_elems,             # MW
                       crys_spec = args.crys_spec, # MW
-                      atom_spec = args.atom_spec) # MW
+                      atom_spec = args.atom_spec, # MW
+                      csv_ext = args.csv_ext) # MW
     collate_fn = collate_pool
     train_loader, val_loader, test_loader = get_train_val_test_loader(
         dataset=dataset,
@@ -224,7 +228,7 @@ def main():
 
     # Pickle the CIFData object so the exact same settings
     # can be used in predict mode
-    with open('dataset.pth.tar','wb') as f:
+    with open(os.path.join(args.resultdir,'dataset.pth.tar'),'wb') as f:
         pickle.dump(dataset, f) 
 
     f = open(os.path.join(args.resultdir,"train.log"),"w")
@@ -262,19 +266,19 @@ def main():
             'normalizer': normalizer.state_dict(),
             'normalizer_Fxyz': normalizer_Fxyz.state_dict(),
             'args': vars(args)
-        }, is_best)
+        }, is_best, args.resultdir)
 
     # test best model
     print('---------Evaluate Model on Test Set---------------')
-    best_checkpoint = torch.load('model_best.pth.tar')
+    best_checkpoint = torch.load(os.path.join(args.resultdir,'model_best.pth.tar'))
     model.load_state_dict(best_checkpoint['state_dict'])
     mae,summary = validate(test_loader, model, criterion, normalizer, normalizer_Fxyz, test=True)
 
     if args.jit:
         sm = torch.jit.script(model)
-        sm.save("model_best.pt")
+        sm.save(os.path.join(args.resultdir,"model_best.pt"))
 
-        sm1 = torch.jit.load('model_best.pt')
+        sm1 = torch.jit.load(os.path.join(args.resultdir,'model_best.pt'))
         print(sm1.dataset1.foo())
 
         #sm1 = torch.jit.script(dataset1)

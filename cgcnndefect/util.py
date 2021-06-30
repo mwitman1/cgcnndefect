@@ -1,4 +1,5 @@
 import shutil
+import os
 
 import numpy as np
 import torch
@@ -92,10 +93,11 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.pth.tar'):
-    torch.save(state, filename)
+def save_checkpoint(state, is_best, resultdir, filename='checkpoint.pth.tar'):
+    torch.save(state, os.path.join(resultdir, filename))
     if is_best:
-        shutil.copyfile(filename, 'model_best.pth.tar')
+        shutil.copyfile(os.path.join(resultdir, filename), 
+                        os.path.join(resultdir, 'model_best.pth.tar'))
 
 
 #def adjust_learning_rate(optimizer, epoch, k):
