@@ -13,9 +13,24 @@ from matplotlib.patches import Patch
 import cycler
 prop_cycle = plt.rcParams['axes.prop_cycle']
 DEFAULT_COLORS = prop_cycle.by_key()['color']
-plt.rc('text', usetex=True)
-plt.rc('font', **{'size':9})
+#plt.rc('font',**{'family':'serif','serif':['Computer Modern Roman']})
+# plt.rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+# plt.rc('text', usetex=True)
+# plt.rc('font', **{'size':8})
 DEFCOLS = prop_cycle.by_key()['color']
+# https://stackoverflow.com/questions/2537868/sans-serif-math-with-latex-in-matplotlib
+# https://tex.stackexchange.com/questions/314190/upright-sans-serif-greek-in-math-mode
+plt.rcParams['text.latex.preamble'] = [
+       r'\usepackage{siunitx}',   # i need upright \micro symbols, but you need...
+       r'\sisetup{detect-all}',   # ...this to force siunitx to actually use your fonts
+       r'\usepackage{helvet}',    # set the normal font here
+       r'\usepackage{sansmathfonts}',  # load up the sansmath so that math -> helvet
+       #r'\sansmath',              # <- tricky! -- gotta actually tell tex to use!
+]
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Helvetica"]})
 
 def plot(files, labels=None):
 
@@ -23,7 +38,7 @@ def plot(files, labels=None):
 
     # in case we want to plot them separately
     # https://matplotlib.org/3.1.1/gallery/subplots_axes_and_figures/gridspec_and_subplots.html
-    fig, ax = plt.subplots(nrows=1,ncols=2,figsize=(3.3,2.0),constrained_layout=True)
+    fig, ax = plt.subplots(nrows=1,ncols=2,figsize=(4,1.6),constrained_layout=True)
 
 
     # Figure 1: Parity Plots
@@ -59,10 +74,8 @@ def plot(files, labels=None):
     print(max_act_energy)
     ax[0].plot([min_act_energy,max_act_energy],[min_act_energy,max_act_energy],c='black') 
 
-    ax[0].legend(loc="lower left",borderpad=0.15,handletextpad=0.25,bbox_to_anchor=(0,1.02),
-                 columnspacing=0.15, ncol=2)
-    ax[0].set_xlabel(r'$E_{\textrm{DFT}}\textrm{ [eV]}$')
-    ax[0].set_ylabel(r'$E_{\textrm{CGCNN}}\textrm{ [eV]}$')
+    ax[0].set_xlabel(r'$E_{\mathrm{DFT}}$ [eV]')
+    ax[0].set_ylabel(r'$E_{\mathrm{CGCNN}}$ [eV]')
 
 
 
@@ -83,14 +96,15 @@ def plot(files, labels=None):
         ax[1].hist(bin_edges[:-1],bins=bin_edges,weights=hist,
                    lw=.5, fc = matplotlib.colors.to_rgb(DEFCOLS[i])+(0.5,),
                    edgecolor = matplotlib.colors.to_rgb(DEFCOLS[i]),#+(0.5,),
-                   label=r'$\textrm{MAE=%.3f}$'%MAE)
+                   label=r'MAE=%.3f'%MAE)
 
-    ax[1].legend(loc="lower left",borderpad=0.15,handletextpad=0.25,bbox_to_anchor=(0,1.02),
-                 columnspacing=0.15, ncol=2)
+    ax[1].legend(loc="upper left",borderpad=0.15,handletextpad=0.25,bbox_to_anchor=(1.,1.02),
+                 handlelength=1,columnspacing=0.15, ncol=1,prop={'size':6})
 
     #ax[1].set_yscale('log')
-    ax[1].set_ylabel(r'$\textrm{frequency}$')
-    ax[1].set_xlabel(r'$|\textrm{error}|$')
+    ax[1].set_ylabel(r'frequency')
+    ax[1].set_xlabel(r'error [eV]')
+    #ax[1].set_xlim((-2,2))
 
 
     plt.show()

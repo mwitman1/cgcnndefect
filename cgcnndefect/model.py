@@ -207,12 +207,12 @@ class CrystalGraphConvNet(nn.Module):
           Atom hidden features after convolution ???
 
         """
-        atom_feai = self.embedding(atom_fea)
-        #print(atom_feai.shape, "<- embedded atom_fea")
+        atom_fea = self.embedding(atom_fea)
+        #print(atom_fea.shape, "<- embedded atom_fea")
         # >>> torch.Size([N,atom_fea_len])
 
         for conv_func in self.convs:
-            atom_fea = conv_func(atom_feai, nbr_fea, nbr_fea_idx)
+            atom_fea = conv_func(atom_fea, nbr_fea, nbr_fea_idx)
         #print(atom_fea.shape, "<- atom_fea post conv")
         # >>> torch.Size([N,atom_fea_len])
 
