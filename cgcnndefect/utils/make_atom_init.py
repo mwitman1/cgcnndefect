@@ -35,7 +35,16 @@ for key in s1.keys():
 with open('atom_init.json.defect','w') as f:
     f.write(json.dumps(s1,sort_keys=True))
 
-# Type 2: TODO
+# Type 2:
+# no elemental data, can only be used if model is incorporating node-specific,
+# local features from a different data source
+s2 = deepcopy(s)
+for key in s2.keys():
+    s2[key] = []
+with open('atom_init.json.none','w') as f:
+    f.write(json.dumps(s2,sort_keys=True))
+
+# Type 3: TODO
 # each element now has TWO orig_atom_fea vectors
 # orig_atom_fea_contin and orig_atom_fea_disc
 df_elem = pd.DataFrame()
