@@ -442,9 +442,19 @@ class CIFData(Dataset):
 
         # if atom spcific attributes for each crystal provided
         if self.atom_spec is not None:
-            self.local_fea =\
-              [np.loadtxt(os.path.join(self.root_dir,row[0]+"."+self.atom_spec))\
-               for row in self.id_prop_data]
+            # if local fea is 1 dimensional, loadtxt reads the column vec
+            # as a row vec, so need to reconvert back to column vec
+            #self.local_fea =\
+            #  [np.loadtxt(os.path.join(self.root_dir,row[0]+"."+self.atom_spec))\
+            #   for row in self.id_prop_data]
+            self.local_fea = []
+            for row in self.id_prop_data:
+                arr = np.loadtxt(os.path.join(self.root_dir,row[0]+"."+self.atom_spec))
+                if len(arr.shape)==1:
+                    self.local_fea.append(arr.reshape(-1,1))
+                else:
+                    self.local_fea.append(arr)
+                
 
         # if a list of elements specified, assumes these are the only 
         # elements that will be encountered (e.g. for interatomic potential
@@ -540,6 +550,7 @@ class CIFData(Dataset):
 
         if self.atom_spec is not None:
             local_fea = self.local_fea[idx]
+            #print(cif_id, atom_fea.shape, torch.Tensor(local_fea).shape)
             atom_fea = torch.hstack([atom_fea, torch.Tensor(local_fea)])
 
 
