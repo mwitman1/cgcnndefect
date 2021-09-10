@@ -151,8 +151,6 @@ class CrystalGraphConvNet(nn.Module):
             self.logsoftmax = None
             self.dropout = None
 
-
-
         # MW added - split the network after the convolutions to provide Fxyz 
         # outputs as well
         if self.Fxyz:
@@ -392,7 +390,8 @@ class CrystalGraphConvNet(nn.Module):
         # for defect, we are really only interested with the feature
         # vector of the node that would become the defect
         #print([idx_map[0] for idx_map in crystal_atom_idx])
-        summed_fea = [torch.index_select(atom_fea,0,idx_map[0]) for idx_map in crystal_atom_idx]
+        summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
+                      for idx_map in crystal_atom_idx]
         #print(summed_fea)
         #summed_fea = [atom_fea[idx_map[0]] for idx_map in crystal_atom_idx]
 

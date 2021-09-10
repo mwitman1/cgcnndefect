@@ -131,14 +131,15 @@ def collate_pool(dataset_list):
     batch_cif_ids: list
     """
     batch_atom_fea, batch_nbr_fea, batch_nbr_fea_idx = [], [], []
-    batch_atom_type, batch_nbr_type, batch_nbr_dist, batch_pair_type = [],[],[],[] # MW
+    batch_atom_type, batch_nbr_type, batch_nbr_dist, batch_pair_type, batch_nbr_fea_idx_all = [], [],[],[],[] # MW
     batch_global_fea = [] # MW
     crystal_atom_idx, batch_target = [], []
     batch_target_Fxyz = []
     batch_cif_ids = []
     base_idx = 0
     for i, ((atom_fea, nbr_fea, nbr_fea_idx,
-             atom_type, nbr_type, nbr_dist, pair_type, global_fea), # MW
+             atom_type, nbr_type, nbr_dist, pair_type, 
+             global_fea, nbr_fea_idx_all), # MW
             target, target_Fxyz, cif_id)\
             in enumerate(dataset_list):
 
@@ -147,6 +148,7 @@ def collate_pool(dataset_list):
         batch_atom_fea.append(atom_fea)
         batch_nbr_fea.append(nbr_fea)
         batch_nbr_fea_idx.append(nbr_fea_idx+base_idx)
+        batch_nbr_fea_idx_all+=[idx_map+base_idx for idx_map in nbr_fea_idx_all]
 
         # additional info needed for hybridizing w/classical potenteial
         batch_atom_type.append(atom_type) #MW
@@ -179,7 +181,8 @@ def collate_pool(dataset_list):
             torch.cat(batch_nbr_type, dim=0),
             torch.cat(batch_nbr_dist, dim=0),
             torch.cat(batch_pair_type, dim=0),
-            torch.Tensor(batch_global_fea)),\
+            torch.Tensor(batch_global_fea),
+            batch_nbr_fea_idx_all),\
         torch.stack(batch_target, dim=0),\
         stacked_Fxyz,\
         batch_cif_ids
@@ -540,7 +543,8 @@ class CIFData(Dataset):
         #atom_type = torch.LongTensor(atom_type) #MW
         #nbr_type = torch.LongTensor(nbr_type) #MW
         #pair_type = torch.LongTensor(pair_type) #MW
-        atom_fea, nbr_fea, nbr_fea_idx, atom_type, nbr_type, nbr_dist, pair_type =\
+        atom_fea, nbr_fea, nbr_fea_idx, atom_type,\
+        nbr_type, nbr_dist, pair_type, nbr_fea_idx_all =\
             self.featurize_from_nbr_and_atom_list(all_atom_types, all_nbrs, cif_id)
 
         if self.crys_spec is not None:
@@ -559,16 +563,19 @@ class CIFData(Dataset):
         if self.Fxyz:
             target_Fxyz = torch.Tensor(target_Fxyz)
             return (atom_fea, nbr_fea, nbr_fea_idx,\
-                    atom_type, nbr_type, nbr_dist, pair_type),\
+                    atom_type, nbr_type, nbr_dist, 
+                    pair_type, nbr_fea_idx_all),\
                    target, target_Fxyz, cif_id
         else:
             if self.crys_spec is not None:
                 return (atom_fea, nbr_fea, nbr_fea_idx,\
-                        atom_type, nbr_type, nbr_dist, pair_type, global_fea),\
+                        atom_type, nbr_type, nbr_dist, pair_type,\
+                        global_fea, nbr_fea_idx_all),\
                        target, None, cif_id
             else:
                 return (atom_fea, nbr_fea, nbr_fea_idx,\
-                        atom_type, nbr_type, nbr_dist, pair_type, global_fea),\
+                        atom_type, nbr_type, nbr_dist, pair_type,\
+                        nbr_fea_idx_all, global_fea),\
                        target, None, cif_id
 
 
@@ -627,7 +634,7 @@ class CIFData(Dataset):
         atom_fea = np.vstack([self.ari.get_atom_fea(num) for num in all_atom_types])
         atom_fea = torch.Tensor(atom_fea)
         all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
-        nbr_fea_idx, nbr_dist = [], []
+        nbr_fea_idx, nbr_dist, nbr_fea_idx_all = [], [], []
         nbr_type, pair_type = [], [] # MW
         #for nbr in all_nbrs:
         for i, nbr in enumerate(all_nbrs):
@@ -685,6 +692,11 @@ class CIFData(Dataset):
                 else:
                     pair_type.append([-1] * self.max_num_nbr)
 
+                # duplicate nbr_fea_idx but for all nbrs regardless of #
+                nbr_fea_idx_all.append(torch.LongTensor(list(map(lambda x: x[2],nbr))))
+                
+                # TODO compute gs, gp, gd here
+
         # TODO need to test that pair_type created as expected
         nbr_fea_idx, nbr_dist = np.array(nbr_fea_idx), np.array(nbr_dist)
 
@@ -698,7 +710,7 @@ class CIFData(Dataset):
         pair_type = torch.LongTensor(pair_type) #MW
 
         return (atom_fea, nbr_fea, nbr_fea_idx,\
-               atom_type, nbr_type, nbr_dist, pair_type)\
+               atom_type, nbr_type, nbr_dist, pair_type, nbr_fea_idx_all)\
 
 
 @torch.jit.script

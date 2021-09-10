@@ -20,6 +20,7 @@ from .data import CIFData, CIFDataFeaturizer
 from .data import collate_pool, get_train_val_test_loader
 from .model import CrystalGraphConvNet
 from .util import save_checkpoint, AverageMeter, class_eval, mae, Normalizer
+from .model_sph_harmonics import SpookyModel
 
 parser = argparse.ArgumentParser(description='Crystal Graph Convolutional Neural Networks')
 parser.add_argument('data_options', metavar='OPTIONS', nargs='+',
@@ -56,6 +57,7 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
 parser.add_argument('--all-elems', nargs='*', type=int, default=[0],
                     help='If training an IAP, a priori enter all possible atom'+
                          'types that can be encountered in the potential')
+
 train_group = parser.add_mutually_exclusive_group()
 train_group.add_argument('--train-ratio', default=None, type=float, metavar='N',
                     help='number of training data to be loaded (default none)')
@@ -68,6 +70,7 @@ valid_group.add_argument('--val-ratio', default=0.1, type=float, metavar='N',
 valid_group.add_argument('--val-size', default=None, type=int, metavar='N',
                          help='number of validation data to be loaded (default '
                               '1000)')
+
 test_group = parser.add_mutually_exclusive_group()
 test_group.add_argument('--test-ratio', default=0.1, type=float, metavar='N',
                     help='percentage of test data to be loaded (default 0.1)')
@@ -85,11 +88,11 @@ parser.add_argument('--n-conv', default=3, type=int, metavar='N',
 parser.add_argument('--n-h', default=1, type=int, metavar='N',
                     help='number of hidden layers after pooling')
 
+# New CL options added by MW
 parser.add_argument('--resultdir', default='.', type=str, metavar='N',
                     help='location to write test results')
 parser.add_argument('--jit', action='store_true',
                     help='Create a serialized Troch script')
-
 parser.add_argument('--crys-spec', default=None, type=str, metavar='N',
                     help='ext of file that contains global crystal '
                          'features for each example (i.e. example.ext)'
@@ -102,6 +105,8 @@ parser.add_argument('--atom-spec', default=None, type=str, metavar='N',
 parser.add_argument('--csv-ext', default='', type=str,
                     help='id_prop.csv + csv-ext so that test sets can be manually '
                          'specified without recopying all of the data in a diff folder')
+parser.add_argument('--model-type', default='cgcnn', type=str,
+                    choices=['cgcnn','spooky'])
 
 
 args = parser.parse_args(sys.argv[1:])
@@ -176,19 +181,23 @@ def main():
     else:
         global_fea_len = 0
 
-    model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
-                                atom_fea_len=args.atom_fea_len,
-                                n_conv=args.n_conv,
-                                h_fea_len=args.h_fea_len,
-                                n_h=args.n_h,
-                                classification=True if args.task ==
-                                                       'classification' else False,
-                                Fxyz=True if args.task == 'Fxyz' else False, #MW
-                                all_elems=args.all_elems, #MW
-                                global_fea_len=global_fea_len) #MW
-    print("Number trainable params: %d"%sum(p.numel() for p in model.parameters() if p.requires_grad))
-    #print(list(model.parameters()))
-    #print([item.grad for item in list(model.parameters())])
+    if args.model_type == 'cgcnn':
+        model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
+                                    atom_fea_len=args.atom_fea_len,
+                                    n_conv=args.n_conv,
+                                    h_fea_len=args.h_fea_len,
+                                    n_h=args.n_h,
+                                    classification=True if args.task ==
+                                                           'classification' else False,
+                                    Fxyz=True if args.task == 'Fxyz' else False, #MW
+                                    all_elems=args.all_elems, #MW
+                                    global_fea_len=global_fea_len) #MW
+    elif args.model_type == 'spooky':
+        model = SpookyModel(orig_atom_fea)
+
+
+    print("Number trainable params: %d"%\
+          sum(p.numel() for p in model.parameters() if p.requires_grad))
 
     if args.cuda:
         model.cuda()
@@ -331,7 +340,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
                          input[5],  #MW
                          input[6],  #MW
                          input[7],  #MW
-                         input[8])#MW 
+                         input[8])  #MW 
             if args.all_elems != [0]:
                 crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                              input[4],
