@@ -45,7 +45,7 @@ def compute_rhok(r, k, K, rcut, gamma=0.5):
     return rhok
            
 
-def get_harmonics_fea(structure, all_nbrs, atom_fea_len, K, rcut):
+def get_harmonics_fea(structure, all_nbrs, K, rcut):
     """
     May need to optimize/vectorize as much of this as possible later on
 
@@ -436,7 +436,7 @@ if __name__ == "__main__":
     # time the featurization
     t1 = time.time()
     gs_fea, gp_fea, gd_fea = get_harmonics_fea(crystal, all_nbrs, 
-                                               atom_fea_len, K, cutoff)
+                                               K, cutoff)
     t1e = time.time()
 
     # time a single convolution operation

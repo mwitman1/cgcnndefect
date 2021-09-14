@@ -15,6 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
 from .util import ELEM_DICT
+from .model_sph_harmonics import get_harmonics_fea
 
 
 def get_train_val_test_loader(dataset, collate_fn=default_collate,
@@ -131,7 +132,8 @@ def collate_pool(dataset_list):
     batch_cif_ids: list
     """
     batch_atom_fea, batch_nbr_fea, batch_nbr_fea_idx = [], [], []
-    batch_atom_type, batch_nbr_type, batch_nbr_dist, batch_pair_type, batch_nbr_fea_idx_all = [], [],[],[],[] # MW
+    batch_atom_type, batch_nbr_type, batch_nbr_dist, batch_pair_type = [],[],[],[] # MW
+    batch_nbr_fea_idx_all, batch_gs_fea, batch_gp_fea, batch_gd_fea = [], [], [], []
     batch_global_fea = [] # MW
     crystal_atom_idx, batch_target = [], []
     batch_target_Fxyz = []
@@ -139,7 +141,8 @@ def collate_pool(dataset_list):
     base_idx = 0
     for i, ((atom_fea, nbr_fea, nbr_fea_idx,
              atom_type, nbr_type, nbr_dist, pair_type, 
-             global_fea, nbr_fea_idx_all), # MW
+             global_fea, 
+             nbr_fea_idx_all, gs_fea, gp_fea, gd_fea), # MW
             target, target_Fxyz, cif_id)\
             in enumerate(dataset_list):
 
@@ -148,24 +151,34 @@ def collate_pool(dataset_list):
         batch_atom_fea.append(atom_fea)
         batch_nbr_fea.append(nbr_fea)
         batch_nbr_fea_idx.append(nbr_fea_idx+base_idx)
-        batch_nbr_fea_idx_all+=[idx_map+base_idx for idx_map in nbr_fea_idx_all]
 
-        # additional info needed for hybridizing w/classical potenteial
+
+        # additional info needed for hybridizing w/classical potenteial (i.e.
         batch_atom_type.append(atom_type) #MW
         batch_nbr_type.append(nbr_type) #MW
         batch_nbr_dist.append(nbr_dist) #MW
         batch_pair_type.append(pair_type) #MW
 
+        # bookkeeping for crystals in batch, etc
         new_idx = torch.LongTensor(np.arange(n_i)+base_idx)
         crystal_atom_idx.append(new_idx)
         batch_target.append(target)
         batch_target_Fxyz.append(target_Fxyz)
         batch_cif_ids.append(cif_id)
-        base_idx += n_i
 
         # additional global crys features for each example
         batch_global_fea.append(global_fea) # MW
 
+        # features needed for SpookyNet type model (i.e. spherical harmonics)
+        # NOTE, all objects are lists because each Tensor entry has variable dim=0
+        # due to the possible different number of neighbors for each atom environment
+        batch_nbr_fea_idx_all+=[idx_map+base_idx for idx_map in nbr_fea_idx_all]
+        batch_gs_fea += gs_fea
+        batch_gp_fea += gp_fea
+        batch_gd_fea += gd_fea
+
+        # increment base_idx by number of atoms in this crystal
+        base_idx += n_i
     try:
         stacked_Fxyz = torch.stack(batch_target_Fxyz, dim=0)
     except:
@@ -182,7 +195,10 @@ def collate_pool(dataset_list):
             torch.cat(batch_nbr_dist, dim=0),
             torch.cat(batch_pair_type, dim=0),
             torch.Tensor(batch_global_fea),
-            batch_nbr_fea_idx_all),\
+            batch_nbr_fea_idx_all,
+            batch_gs_fea,
+            batch_gp_fea,
+            batch_gd_fea),\
         torch.stack(batch_target, dim=0),\
         stacked_Fxyz,\
         batch_cif_ids
@@ -399,7 +415,9 @@ class CIFData(Dataset):
                  random_seed=123,
                  crys_spec = None,
                  atom_spec = None,
-                 csv_ext = ''):
+                 csv_ext = '',
+                 model_type='cgcnn',
+                 K = 4):
         self.root_dir = root_dir
         self.Fxyz = Fxyz
         self.all_elems = all_elems
@@ -410,6 +428,13 @@ class CIFData(Dataset):
         self.crys_spec = crys_spec
         self.atom_spec = atom_spec
         self.csv_ext = csv_ext
+        self.model_type = model_type
+        if self.model_type == 'spooky':
+            self.compute_sph_harm = True
+        else:
+            self.compute_sph_harm = False
+        self.K = K
+
         self.reload_data()
 
     def reload_data(self):
@@ -478,19 +503,22 @@ class CIFData(Dataset):
 
     @functools.lru_cache(maxsize=None)  # Cache loaded structures
     def __getitem__(self, idx):
+
         # Target quantities
         if self.Fxyz:
             cif_id, target, target_Fxyz = self.id_prop_data[idx]
         else:
             cif_id, target = self.id_prop_data[idx]
 
-
-
         # Base structure information
         crystal = Structure.from_file(os.path.join(self.root_dir,
                                                    cif_id+'.cif'))
-        all_atom_types = [ELEM_DICT[crystal[i].specie.symbol] for i in range(len(crystal))]
-        all_nbrs = crystal.get_all_neighbors_old(self.radius, include_index=True)
+
+        all_atom_types = [ELEM_DICT[crystal[i].specie.symbol]\
+                          for i in range(len(crystal))]
+
+        all_nbrs = crystal.get_all_neighbors_old(self.radius, 
+                                                 include_index=True)
 
 
         # Featurization
@@ -544,8 +572,12 @@ class CIFData(Dataset):
         #nbr_type = torch.LongTensor(nbr_type) #MW
         #pair_type = torch.LongTensor(pair_type) #MW
         atom_fea, nbr_fea, nbr_fea_idx, atom_type,\
-        nbr_type, nbr_dist, pair_type, nbr_fea_idx_all =\
-            self.featurize_from_nbr_and_atom_list(all_atom_types, all_nbrs, cif_id)
+        nbr_type, nbr_dist, pair_type,\
+        nbr_fea_idx_all, gs_fea, gp_fea, gd_fea =\
+            self.featurize_from_nbr_and_atom_list(all_atom_types, 
+                                                  all_nbrs, 
+                                                  crystal,
+                                                  cif_id)
 
         if self.crys_spec is not None:
             global_fea = list(self.global_fea[idx])
@@ -561,21 +593,24 @@ class CIFData(Dataset):
         # return format for DataLoader
         target = torch.Tensor([float(target)])
         if self.Fxyz:
+            # TODO delete this option
             target_Fxyz = torch.Tensor(target_Fxyz)
             return (atom_fea, nbr_fea, nbr_fea_idx,\
-                    atom_type, nbr_type, nbr_dist, 
-                    pair_type, nbr_fea_idx_all),\
+                    atom_type, nbr_type, nbr_dist, pair_type,\
+                    nbr_fea_idx_all, gs_fea, gp_fea, gd_fea),\
                    target, target_Fxyz, cif_id
         else:
             if self.crys_spec is not None:
                 return (atom_fea, nbr_fea, nbr_fea_idx,\
                         atom_type, nbr_type, nbr_dist, pair_type,\
-                        global_fea, nbr_fea_idx_all),\
+                        global_fea,\
+                        nbr_fea_idx_all, gs_fea, gp_fea, gd_fea),\
                        target, None, cif_id
             else:
                 return (atom_fea, nbr_fea, nbr_fea_idx,\
                         atom_type, nbr_type, nbr_dist, pair_type,\
-                        nbr_fea_idx_all, global_fea),\
+                        global_fea,\
+                        nbr_fea_idx_all, gs_fea, gp_fea, gd_fea),\
                        target, None, cif_id
 
 
@@ -590,8 +625,14 @@ class CIFData(Dataset):
             outside the normal train/test infrastructure
         """
         cif_id, target, target_Fxyz = 0, None, None 
-        all_atom_types = [crystal[i].specie.number for i in range(len(crystal))]
-        all_nbrs = crystal.get_all_neighbors_old(self.radius, include_index=True)
+
+        all_atom_types = [crystal[i].specie.number\
+                          for i in range(len(crystal))]
+
+        all_nbrs = crystal.get_all_neighbors_old(self.radius, 
+                                                 include_index=True)
+
+        all_coords = crystal.coords
 
         atom_fea, nbr_fea, nbr_fea_idx, atom_type, nbr_type, nbr_dist, pair_type =\
             self.featurize_from_nbr_and_atom_list(all_atom_types, all_nbrs, cif_id)
@@ -605,7 +646,10 @@ class CIFData(Dataset):
                     atom_type, nbr_type, nbr_dist, pair_type),\
                    target, None, cif_id
 
-    def featurize_from_nbr_and_atom_list(self, all_atom_types, all_nbrs, cif_id='struct'):
+    def featurize_from_nbr_and_atom_list(self, all_atom_types, 
+                                               all_nbrs, 
+                                               crystal,
+                                               cif_id='struct'):
         """
         all_atom_types : list of ints
             list of atomic numbers for all sites
@@ -627,16 +671,22 @@ class CIFData(Dataset):
                      ]
                      ...
                    ]
+
+        TODO: cleanup the insane list comprehensions
+        TODO: break-up this function into model specific requirements
+              for featurization
         """
         # Featurization
         #atom_fea = np.vstack([self.ari.get_atom_fea(crystal[i].specie.number)
         #                      for i in range(len(crystal))])
-        atom_fea = np.vstack([self.ari.get_atom_fea(num) for num in all_atom_types])
+        atom_fea = np.vstack([self.ari.get_atom_fea(num)\
+                             for num in all_atom_types])
         atom_fea = torch.Tensor(atom_fea)
         all_nbrs = [sorted(nbrs, key=lambda x: x[1]) for nbrs in all_nbrs]
         nbr_fea_idx, nbr_dist, nbr_fea_idx_all = [], [], []
         nbr_type, pair_type = [], [] # MW
-        #for nbr in all_nbrs:
+        nbr_fea_idx_all, gs_fea_all, gp_fea_all, gd_fea_all = [], [], [], []
+
         for i, nbr in enumerate(all_nbrs):
             if len(nbr) < self.max_num_nbr:
                 warnings.warn('%s did not find enough neighbors to build graph. '
@@ -647,18 +697,26 @@ class CIFData(Dataset):
                 nbr_dist.append(list(map(lambda x: x[1], nbr)) +
                                [self.radius + 1.] * (self.max_num_nbr -
                                                      len(nbr)))
+
+                # Double check the nbr_fea_dix construction
                 #assert list(map(lambda x: x[0].specie.number, nbr)) +\
                 #                [0] * (self.max_num_nbr - len(nbr)) ==\
                 #       list(map(lambda x: all_atom_types[x[2]], nbr)) +\
                 #                [0] * (self.max_num_nbr - len(nbr)) ==\
+
                 nbr_type.append(list(map(lambda x: all_atom_types[x[2]],nbr)) +
                                 [0] * (self.max_num_nbr - len(nbr)))
+
+                # double check the nbr type computation
                 #assert list(map(lambda x: self.pair_ind[
-                #         tuple(sorted([all_atom_types[i],x[0].specie.number]))], nbr)) +\
+                #         tuple(sorted([all_atom_types[i],i
+                #                       x[0].specie.number]))], nbr)) +\
                 #         [-1] * (self.max_num_nbr - len(nbr)) ==\
                 #       list(map(lambda x: self.pair_ind[\
-                #         tuple(sorted([all_atom_types[i],all_atom_types[x[2]]]))], nbr)) +\
+                #         tuple(sorted([all_atom_types[i],
+                #                       all_atom_types[x[2]]]))], nbr)) +\
                 #         [-1] * (self.max_num_nbr - len(nbr))
+
                 if self.all_elems != [0]:
                     pair_type.append(\
                       list(map(lambda x: self.pair_ind[
@@ -671,31 +729,52 @@ class CIFData(Dataset):
                                             nbr[:self.max_num_nbr])))
                 nbr_dist.append(list(map(lambda x: x[1],
                                         nbr[:self.max_num_nbr])))
+
+                # Double check the nbr_fea_idx construction
                 #assert list(map(lambda x: x[0].specie.number, 
                 #                nbr[:self.max_num_nbr])) ==\
                 #       list(map(lambda x: all_atom_types[x[2]], 
                 #                nbr[:self.max_num_nbr]))
+
                 nbr_type.append(list(map(lambda x: all_atom_types[x[2]],
                                         nbr[:self.max_num_nbr])))
+
+                # double check the nbr_type construction
                 #assert list(map(lambda x: self.pair_ind[\
-                #        tuple(sorted([all_atom_types[i],x[0].specie.number]))],
-                #                        nbr[:self.max_num_nbr])) ==\
+                #        tuple(sorted([all_atom_types[i],
+                #                      x[0].specie.number]))],
+                #              nbr[:self.max_num_nbr])) ==\
                 #       list(map(lambda x: self.pair_ind[\
-                #        tuple(sorted([all_atom_types[i],all_atom_types[x[2]]]))],
-                #                        nbr[:self.max_num_nbr]))
+                #        tuple(sorted([all_atom_types[i],
+                #                      all_atom_types[x[2]]]))],
+                #              nbr[:self.max_num_nbr]))
                 if self.all_elems != [0]:
                     pair_type.append(\
                       list(\
                         map(lambda x: self.pair_ind[
-                            tuple(sorted([all_atom_types[i],all_atom_types[x[2]]]))],
-                                            nbr[:self.max_num_nbr])))
+                            tuple(sorted([all_atom_types[i],
+                                          all_atom_types[x[2]]]))],
+                            nbr[:self.max_num_nbr])))
                 else:
                     pair_type.append([-1] * self.max_num_nbr)
 
-                # duplicate nbr_fea_idx but for all nbrs regardless of #
-                nbr_fea_idx_all.append(torch.LongTensor(list(map(lambda x: x[2],nbr))))
+                if self.compute_sph_harm:
+                    # duplicate nbr_fea_idx but for ALL nbrs (no max #) 
+                    nbr_fea_idx_all.append(\
+                        torch.LongTensor(list(map(lambda x: x[2],nbr)))
+                    )
+                else:
+                    # dummy data now for compatibility, need to just do 
+                    # a big refactor to separate the featurization
+                    # strategies for different models
+                    nbr_fea_idx_all.append(torch.LongTensor([0]))
                 
-                # TODO compute gs, gp, gd here
+        if self.compute_sph_harm:        
+            # compute gs, gp, gd for all atoms in crystal here
+            gs_fea, gp_fea, gd_fea =\
+                get_harmonics_fea(crystal, all_nbrs, self.K, self.radius)
+        else:
+            gs_fea, gp_fea, gd_fea = [None], [None], [None]
 
         # TODO need to test that pair_type created as expected
         nbr_fea_idx, nbr_dist = np.array(nbr_fea_idx), np.array(nbr_dist)
@@ -710,7 +789,8 @@ class CIFData(Dataset):
         pair_type = torch.LongTensor(pair_type) #MW
 
         return (atom_fea, nbr_fea, nbr_fea_idx,\
-               atom_type, nbr_type, nbr_dist, pair_type, nbr_fea_idx_all)\
+                atom_type, nbr_type, nbr_dist, pair_type,\
+                nbr_fea_idx_all, gs_fea, gp_fea, gd_fea)\
 
 
 @torch.jit.script

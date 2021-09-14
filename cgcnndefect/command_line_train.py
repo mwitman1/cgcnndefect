@@ -128,11 +128,12 @@ def main():
     # load data
     print(args.task)
     dataset = CIFData(*args.data_options,
-                      args.task=='Fxyz',          # MW
-                      args.all_elems,             # MW
-                      crys_spec = args.crys_spec, # MW
-                      atom_spec = args.atom_spec, # MW
-                      csv_ext = args.csv_ext) # MW
+                      args.task=='Fxyz',            # MW: to remove
+                      args.all_elems,               # MW: needed for computing ZBL
+                      crys_spec = args.crys_spec,   # MW: if global crystal features available
+                      atom_spec = args.atom_spec,   # MW: if local/atom features available
+                      csv_ext = args.csv_ext,       # MW: if using a specific id_prop.csv.*
+                      model_type = args.model_type) # MW: if using non-CGCNN model
     collate_fn = collate_pool
     train_loader, val_loader, test_loader = get_train_val_test_loader(
         dataset=dataset,
@@ -193,7 +194,13 @@ def main():
                                     all_elems=args.all_elems, #MW
                                     global_fea_len=global_fea_len) #MW
     elif args.model_type == 'spooky':
-        model = SpookyModel(orig_atom_fea)
+        model = SpookyModel(orig_atom_fea_len,
+                            atom_fea_len = args.atom_fea_len,
+                            n_conv = args.n_conv,
+                            h_fea_len = args.h_fea_len,
+                            n_h = args.n_h,
+                            global_fea_len = global_fea_len) #MW
+                            
 
 
     print("Number trainable params: %d"%\
@@ -332,15 +339,25 @@ def train(train_loader, model, criterion, optimizer, epoch,
                          input[2].cuda(non_blocking=True),
                          [crys_idx.cuda(non_blocking=True) for crys_idx in input[3]])
         else:
-            input_var = (Variable(input[0]),
-                         Variable(input[1]),
-                         input[2],
-                         input[3],
-                         input[4],  #MW
-                         input[5],  #MW
-                         input[6],  #MW
-                         input[7],  #MW
-                         input[8])  #MW 
+            if args.model_type == 'cgcnn':
+                input_var = (Variable(input[0]), # batch_atom_fea
+                             Variable(input[1]), # batch_nbr_fea
+                             input[2],           # batch_nbr_fea_idx
+                             input[3],           # crystal_atom_idx
+                             input[4],           # MW: batch_atom_type 
+                             input[5],           # MW: batch_nbr_type
+                             input[6],           # MW: batch_nbr_dist
+                             input[7],           # MW: batch_pair_type
+                             input[8])           # MW: batch_global_fea
+            elif args.model_type == 'spooky':
+                input_var = (Variable(input[0]), # batch_atom_fea
+                             input[9],           # batch_nbr_fea_idx_all
+                             input[3],           # crystal_atom_idx
+                             input[10],          # batch_gs_fea
+                             input[11],          # batch_gp_fea
+                             input[12],          # batch_gd_fea
+                             input[8])           # batch_global_fea
+
             if args.all_elems != [0]:
                 crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                              input[4],
@@ -506,15 +523,25 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                              [crys_idx.cuda(non_blocking=True) for crys_idx in input[3]])
         else:
             with torch.no_grad():
-                input_var = (Variable(input[0]),
-                             Variable(input[1]),
-                             input[2],
-                             input[3],
-                             input[4], #MW
-                             input[5], #MW
-                             input[6], #MW
-                             input[7], #MW
-                             input[8]) #MW
+                if args.model_type == 'cgcnn':
+                    input_var = (Variable(input[0]), # batch_atom_fea
+                                 Variable(input[1]), # batch_nbr_fea
+                                 input[2],           # batch_nbr_fea_idx
+                                 input[3],           # crystal_atom_idx
+                                 input[4],           # MW: batch_atom_type 
+                                 input[5],           # MW: batch_nbr_type
+                                 input[6],           # MW: batch_nbr_dist
+                                 input[7],           # MW: batch_pair_type
+                                 input[8])           # MW: batch_global_fea
+                elif args.model_type == 'spooky':
+                    input_var = (Variable(input[0]), # batch_atom_fea
+                                 input[9],           # batch_nbr_fea_idx_all
+                                 input[3],           # crystal_atom_idx
+                                 input[10],          # batch_gs_fea
+                                 input[11],          # batch_gp_fea
+                                 input[12],          # batch_gd_fea
+                                 input[8])           # batch_global_fea
+
             if args.all_elems != [0]:
                 crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                              input[4],
