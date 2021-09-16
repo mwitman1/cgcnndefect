@@ -393,6 +393,7 @@ def train(train_loader, model, criterion, optimizer, epoch,
 
         # compute output = target, target_Fxyz (if Fxyz specified else None)
         output = model(*input_var)
+        
         #loss = criterion(output, target_var) #<- Fxyz mod
         loss_orig = criterion(output[0], target_var)
         alpha=1

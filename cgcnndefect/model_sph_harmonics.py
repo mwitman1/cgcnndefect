@@ -184,14 +184,14 @@ class SpookyLocalBlock(nn.Module):
         super(SpookyLocalBlock, self).__init__()
         self.atom_fea_len = atom_fea_len
 
-        self.Gs = nn.Parameter(torch.Tensor(atom_fea_len,K))
-        self.Gp = nn.Parameter(torch.Tensor(atom_fea_len,K))
-        self.Gd = nn.Parameter(torch.Tensor(atom_fea_len,K))
+        self.Gs = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
+        self.Gp = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
+        self.Gd = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
 
-        self.P1 = nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len))
-        self.P2 = nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len))
-        self.D1 = nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len))
-        self.D2 = nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len))
+        self.P1 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.P2 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.D1 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.D2 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
 
         self.resmlp_c = ResMLP(atom_fea_len,atom_fea_len)
         self.resmlp_s = ResMLP(atom_fea_len,atom_fea_len)
@@ -311,10 +311,10 @@ class SpookyLocalBlock(nn.Module):
                 dim1=-2, dim2=-1),
             dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
 
-        #print(final_c.shape)
-        #print(final_s.shape)
-        #print(final_p.shape)
-        #print(final_d.shape)
+        #print(final_c)
+        #print(final_s)
+        #print(final_p)
+        #print(final_d)
 
         l = final_c +\
             final_s +\
@@ -385,7 +385,7 @@ class SpookyModel(nn.Module):
 
         out = self.fc_out(crys_fea)
 
-        return out
+        return [out]
 
     def pooling(self, atom_fea : torch.Tensor,
                       crystal_atom_idx : List[torch.Tensor]):

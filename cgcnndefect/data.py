@@ -409,7 +409,7 @@ class CIFData(Dataset):
     """
     def __init__(self, root_dir, Fxyz=False, all_elems=[0],
                  max_num_nbr=12, 
-                 radius=8, 
+                 radius=5, 
                  dmin=0, 
                  step=0.2,
                  random_seed=123,
