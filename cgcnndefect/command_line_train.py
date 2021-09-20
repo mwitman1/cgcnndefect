@@ -127,6 +127,7 @@ def main():
 
     # load data
     print(args.task)
+    torch.multiprocessing.set_sharing_strategy('file_system')
     dataset = CIFData(*args.data_options,
                       args.task=='Fxyz',            # MW: to remove
                       args.all_elems,               # MW: needed for computing ZBL

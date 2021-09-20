@@ -52,6 +52,9 @@ def get_train_val_test_loader(dataset, collate_fn=default_collate,
       DataLoader that random samples the test data, returns if
         return_test=True.
     """
+    print('num_workers ', num_workers)
+    #torch.set_num_threads(1)
+    torch.multiprocessing.set_sharing_strategy('file_system')
     total_size = len(dataset)
     if train_ratio is None:
         assert val_ratio + test_ratio < 1
@@ -417,7 +420,8 @@ class CIFData(Dataset):
                  atom_spec = None,
                  csv_ext = '',
                  model_type='cgcnn',
-                 K = 4):
+                 K = 4,
+                 maxnj=75):
         self.root_dir = root_dir
         self.Fxyz = Fxyz
         self.all_elems = all_elems
@@ -434,6 +438,7 @@ class CIFData(Dataset):
         else:
             self.compute_sph_harm = False
         self.K = K
+        self.maxnj = maxnj # max neighs for sph_harm
 
         self.reload_data()
 
@@ -464,9 +469,12 @@ class CIFData(Dataset):
 
         # if global crystal attributes provided
         if self.crys_spec is not None:
-            self.global_fea =\
-              [np.loadtxt(os.path.join(self.root_dir, row[0]+"."+self.crys_spec))\
-               for row in self.id_prop_data]
+            #self.global_fea =\
+            #  [np.loadtxt(os.path.join(self.root_dir, row[0]+"."+self.crys_spec))\
+            #   for row in self.id_prop_data]
+            self.global_fea = []
+            for row in self.id_prop_data:
+                self.global_fea.append(np.loadtxt(os.path.join(self.root_dir, row[0]+"."+self.crys_spec)))
 
         # if atom spcific attributes for each crystal provided
         if self.atom_spec is not None:
@@ -509,6 +517,7 @@ class CIFData(Dataset):
             cif_id, target, target_Fxyz = self.id_prop_data[idx]
         else:
             cif_id, target = self.id_prop_data[idx]
+        print("Loading %d:"%idx, cif_id)
 
         # Base structure information
         crystal = Structure.from_file(os.path.join(self.root_dir,
@@ -517,8 +526,8 @@ class CIFData(Dataset):
         all_atom_types = [ELEM_DICT[crystal[i].specie.symbol]\
                           for i in range(len(crystal))]
 
-        all_nbrs = crystal.get_all_neighbors_old(self.radius, 
-                                                 include_index=True)
+        all_nbrs = crystal.get_all_neighbors(self.radius, 
+                                             include_index=True)
 
 
         # Featurization
@@ -761,7 +770,8 @@ class CIFData(Dataset):
                 if self.compute_sph_harm:
                     # duplicate nbr_fea_idx but for ALL nbrs (no max #) 
                     nbr_fea_idx_all.append(\
-                        torch.LongTensor(list(map(lambda x: x[2],nbr)))
+                        torch.LongTensor(list(map(lambda x: x[2],nbr))+\
+                                         [0] * (self.maxnj - len(nbr)))
                     )
                 else:
                     # dummy data now for compatibility, need to just do 
