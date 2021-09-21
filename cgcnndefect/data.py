@@ -199,9 +199,9 @@ def collate_pool(dataset_list):
             torch.cat(batch_pair_type, dim=0),
             torch.Tensor(batch_global_fea),
             batch_nbr_fea_idx_all,
-            batch_gs_fea,
-            batch_gp_fea,
-            batch_gd_fea),\
+            torch.stack(batch_gs_fea, dim=0),
+            torch.stack(batch_gp_fea, dim=0),
+            torch.stack(batch_gd_fea, dim=0)),\
         torch.stack(batch_target, dim=0),\
         stacked_Fxyz,\
         batch_cif_ids

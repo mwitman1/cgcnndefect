@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 from typing import Tuple, List
 import time
+from copy import deepcopy
 
 
 def polar_coords(cart_vec):
@@ -197,6 +198,8 @@ class SpookyLocalBlock(nn.Module):
     def __init__(self, atom_fea_len, K):
         super(SpookyLocalBlock, self).__init__()
         self.atom_fea_len = atom_fea_len
+        self.F = atom_fea_len
+        self.K = K
 
         self.Gs = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
         self.Gp = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
@@ -212,7 +215,7 @@ class SpookyLocalBlock(nn.Module):
         self.resmlp_p = ResMLP(atom_fea_len,atom_fea_len)
         self.resmlp_d = ResMLP(atom_fea_len,atom_fea_len)
 
-    def forward(self, atom_fea : torch.Tensor,
+    def forward_nonvec(self, atom_fea : torch.Tensor,
                       nbr_fea_idx : List[torch.LongTensor],
                       crystal_atom_idx : List[torch.LongTensor],
                       gs : List[torch.Tensor],
@@ -222,95 +225,12 @@ class SpookyLocalBlock(nn.Module):
         Test forward vectorized using 0 padding for a pre-selected nj max
         """
         # TODO
-        pass
-
-    def forward(self, atom_fea : torch.Tensor,
-                      nbr_fea_idx : List[torch.LongTensor],
-                      crystal_atom_idx : List[torch.LongTensor],
-                      gs : List[torch.Tensor],
-                      gp : List[torch.Tensor],
-                      gd : List[torch.Tensor]):
-
-        """
-        N : number of atoms in batch
-        N0 : number of crystals in batch
-        nc : number of atoms in crystal c in crystal_atom_idx
-        nj : number of neighbors to atom i in batch
-
-        atom_fea : Variable(torch.Tensor) shape (N, atom_fea_len)
-        nbr_fea_idx : List(torch.LongTensor) of len(N) with shape(nj)
-        crystal_atom_idx : List(torch.LongTensor) of len(N) with shape(nc)
-
-        gs : List(torch.Tensor) of len (N) with shape(nj, K)
-        gp : List(torch.Tensor) of len (N) with shape(nj, K, 3)
-        gd : List(torch.Tensor) of len (N) with shape(nj, K, 5)
-
-        """
-        # TODO : need conversion from crystal_atom_idx to nbr_fea_idx
-        # for when there are multiple different crystals in the batch
-
-        #nbr_fea_idx_in_batch = ...
-
-        # shape (N, atom_fea_len)
+        # shape (N, F)
         s_fea = self.resmlp_s(atom_fea)
-        # shape (N, atom_fea_len)
+        # shape (N, F)
         p_fea = self.resmlp_p(atom_fea)
-        # shape (N, atom_fea_len)
+        # shape (N, F)
         d_fea = self.resmlp_d(atom_fea)
-       
-        ## OPTION 1: vectorized version
-        ## -> when each atom env has padded 0s to make up to exactly njmax neighbors
- 
-        ##print(self.Gs.expand(len(gs),gs[0].shape[0],self.Gs.shape[0],self.Gs.shape[1]).shape)
-        ##print(torch.stack(gs,dim=0).shape, len(gs))
-        ## shape (N, njmax, F, 1)
-        #s_env = torch.matmul(self.Gs.expand(len(gs), # N
-        #                                    gs[0].shape[0], # njmax
-        #                                    self.Gs.shape[0], # F
-        #                                    self.Gs.shape[1]), # K 
-        #                     torch.stack(gs,dim=0)) # (N, njmax, K, 1)
-        ##print(s_env.shape)
-        ## shape (N, njmax, F) # TODO: how the heck to vectorize
-        #nbr_s_fea = torch.stack([s_fea.index_select(0,nbr_fea_idx[i])\
-        #                         for i in range(len(nbr_fea_idx))])
-        ##print(nbr_s_fea.shape)
-        ## shape (N,atom_fea)
-        #final_s = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,dim=1).squeeze()
-        ##print(final_s_vectorized.shape)
-        #
-
-        ## shape (N, nj, F, 3)
-        #p_env = torch.matmul(self.Gp.expand(len(gs), # N
-        #                                    gp[0].shape[0], # njmax
-        #                                    self.Gp.shape[0], # F
-        #                                    self.Gp.shape[1]), # K
-        #                     torch.stack(gp,dim=0)) # (N, njmax, K, 3)
-        ##print(p_env.shape)
-        ## shape (N, nj, F) # TODO how the heck to vectorize
-        #nbr_p_fea = torch.stack([p_fea.index_select(0, nbr_fea_idx[i])\
-        #                        for i in range(len(nbr_fea_idx))])
-        ##print(nbr_p_fea.shape)
-        ## shape (N, F, 3)  
-        #all_p_vectorized = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
-        #             p_env.shape[0], p_env.shape[1], p_env.shape[2], p_env.shape[3])*p_env,dim=1)
-        ##print(all_p_vectorized.shape)
-        #all_p = torch.transpose(all_p_vectorized,1,2)
-
-
-        ## shape (N, nj, F, 5)
-        #d_env = torch.matmul(self.Gd.expand(len(gd), # N
-        #                                    gd[0].shape[0], # njmax
-        #                                    self.Gd.shape[0], # F
-        #                                    self.Gd.shape[1]), # K
-        #                     torch.stack(gd,dim=0)) # (N, njmax, K, 5)
-        ## shape (N, nj, F)
-        #nbr_d_fea = torch.stack([d_fea.index_select(0, nbr_fea_idx[i])\
-        #                        for i in range(len(nbr_fea_idx))])
-        ## shape (N, 5) 
-        #all_d_vectorized = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
-        #             d_env.shape[0], d_env.shape[1], d_env.shape[2], d_env.shape[3])*d_env,dim=1)
-        #all_d = torch.transpose(all_d_vectorized,1,2)
-
 
         # OPTION 2: non-vectorized version
         # -> nonvectorized version, if nj is diff for each atomic environment
@@ -319,12 +239,12 @@ class SpookyLocalBlock(nn.Module):
         all_d = []
         for i in range(len(gs)):
             # shape (nj, atom_fea_len, 1)
-            s_env = torch.matmul(self.Gs, gs[i]) # note always 0 for padding above njmax
+            s_env = torch.matmul(Gscopy, gs[i]) # note always 0 for padding above njmax
             # shape (nj, atom_fea_len)
             nbr_s_fea = s_fea.index_select(0, nbr_fea_idx[i])
             # shape (atom_fea_len) 
             si = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,0).squeeze()
-            all_s.append(si)
+            all_s_nonvec.append(si)
             #print('S vars')
             #print(s_fea.shape, s_env.shape, nbr_s_fea.shape)
             #print(si.shape)
@@ -393,21 +313,217 @@ class SpookyLocalBlock(nn.Module):
         # shape(N, atom_fea_len)
         final_c = self.resmlp_c(atom_fea)
 
+        l = final_c +\
+            final_s +\
+            final_p +\
+            final_d
+            
+        return l
+
+    def forward(self, atom_fea : torch.Tensor,
+                      nbr_fea_idx : torch.LongTensor,
+                      crystal_atom_idx : List[torch.LongTensor],
+                      gs : torch.Tensor,
+                      gp : torch.Tensor,
+                      gd : torch.Tensor):
+
+        """
+        N : number of atoms in batch
+        N0 : number of crystals in batch
+        nc : number of atoms in crystal c in crystal_atom_idx
+        nj : number of neighbors to atom i in batch
+        F : atom feacture vector length
+
+        atom_fea : Variable(torch.Tensor) shape (N, atom_fea_len)
+        nbr_fea_idx : List(torch.LongTensor) of len(N) with shape(nj)
+        crystal_atom_idx : List(torch.LongTensor) of len(N) with shape(nc)
+
+        gs : List(torch.Tensor) of len (N) with shape(nj, K)
+        gp : List(torch.Tensor) of len (N) with shape(nj, K, 3)
+        gd : List(torch.Tensor) of len (N) with shape(nj, K, 5)
+
+        """
+        # TODO : need conversion from crystal_atom_idx to nbr_fea_idx
+        # for when there are multiple different crystals in the batch
+
+        # shape (N, F)
+        s_fea = self.resmlp_s(atom_fea)
+        # shape (N, F)
+        p_fea = self.resmlp_p(atom_fea)
+        # shape (N, F)
+        d_fea = self.resmlp_d(atom_fea)
+
+       
+        # OPTION 1: vectorized version
+        # -> when each atom env has padded 0s to make up to exactly njmax neighbors
+ 
+        #print(self.Gs.expand(len(gs),gs[0].shape[0],self.Gs.shape[0],self.Gs.shape[1]).shape)
+        #print(torch.stack(gs,dim=0).shape, len(gs))
+        # shape (N, njmax, F, 1)
+        Gscopy = deepcopy(self.Gs)
+        s_env = torch.matmul(self.Gs.expand(len(gs), # N
+                                            gs[0].shape[0], # njmax
+                                            self.F, # F
+                                            self.K), # K 
+                             gs) # (N, njmax, K, 1)
+        #print(s_env.shape)
+
+        # shape (N, njmax, F)
+        #nbr_s_fea = torch.stack([s_fea.index_select(0,nbr_fea_idx[i])\
+        #                         for i in range(len(nbr_fea_idx))])
+        nbr_s_fea =\
+            s_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
+                len(gs), gs[0].shape[0], self.F)
+        #assert torch.allclose(nbr_s_fea, nbr_s_fea_nonvec)
+        #print(nbr_s_fea.shape)
+
+        # shape (N,atom_fea)
+        final_s = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,dim=1).squeeze()
+        #print(final_s_vectorized.shape)
+        
+
+        # shape (N, nj, F, 3)
+        p_env = torch.matmul(self.Gp.expand(len(gs), # N
+                                            gp[0].shape[0], # njmax
+                                            self.F, # F
+                                            self.K), # K
+                             gp) # (N, njmax, K, 3)
+        #                     torch.stack(gp,dim=0)) # (N, njmax, K, 3)
+        #print(p_env.shape)
+
+        # shape (N, nj, F)
+        #nbr_p_fea = torch.stack([p_fea.index_select(0, nbr_fea_idx[i])\
+        #                        for i in range(len(nbr_fea_idx))])
+        nbr_p_fea =\
+            p_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
+                len(gp), gp[0].shape[0], self.F)
+        #print(nbr_p_fea.shape)
+
+        # shape (N, F, 3)  
+        all_p_vectorized = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
+                     p_env.shape[0], p_env.shape[1], self.F, 3)*p_env,dim=1)
+        #print(all_p_vectorized.shape)
+
+        # shape (N, 3, F)  
+        all_p = torch.transpose(all_p_vectorized,1,2)
+
+
+        # shape (N, nj, F, 5)
+        d_env = torch.matmul(self.Gd.expand(len(gd), # N
+                                            gd[0].shape[0], # njmax
+                                            self.F, # F
+                                            self.K), # K
+                             gd) # (N, njmax, K, 5)
+        #                     torch.stack(gd,dim=0)) # (N, njmax, K, 5)
+
+        # shape (N, nj, F)
+        #nbr_d_fea = torch.stack([d_fea.index_select(0, nbr_fea_idx[i])\
+        #                        for i in range(len(nbr_fea_idx))])
+        nbr_d_fea =\
+            d_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
+                len(gd), gd[0].shape[0], self.F)
+
+        # shape (N, F, 5) 
+        all_d_vectorized = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
+                     d_env.shape[0], d_env.shape[1], self.F, 5)*d_env,dim=1)
+
+        # shape (N, 5, F) 
+        all_d = torch.transpose(all_d_vectorized,1,2)
+
+
+        # OPTION 2: non-vectorized version
+        # -> nonvectorized version, if nj is diff for each atomic environment
+        #all_s_nonvec = []
+        #all_p = []
+        #all_d = []
+        #for i in range(len(gs)):
+        #    # shape (nj, atom_fea_len, 1)
+        #    s_env = torch.matmul(Gscopy, gs[i]) # note always 0 for padding above njmax
+        #    # shape (nj, atom_fea_len)
+        #    nbr_s_fea = s_fea.index_select(0, nbr_fea_idx[i])
+        #    # shape (atom_fea_len) 
+        #    si = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,0).squeeze()
+        #    all_s_nonvec.append(si)
+        #    #print('S vars')
+        #    #print(s_fea.shape, s_env.shape, nbr_s_fea.shape)
+        #    #print(si.shape)
+
+        #    # shape (nj, atom_fea_len, 3)
+        #    p_env = torch.matmul(self.Gp, gp[i])
+        #    # shape (nj, atom_fea_len)
+        #    nbr_p_fea = p_fea.index_select(0, nbr_fea_idx[i])
+        #    # shape (atom_fea_len, 3) 
+        #    pi = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
+        #         p_env.shape[0], p_env.shape[1], p_env.shape[2])*p_env,0)
+        #    all_p.append(pi)
+        #    #print('P vars')
+        #    #print(p_fea.shape, p_env.shape, nbr_p_fea.shape)
+        #    #print(pi.shape)
+
+        #    # shape (nj, atom_fea_len, 5)
+        #    d_env = torch.matmul(self.Gd, gd[i])
+        #    # shape (nj, atom_fea_len)
+        #    nbr_d_fea = d_fea.index_select(0, nbr_fea_idx[i])
+        #    # shape (atom_fea_len, 5) 
+        #    di = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
+        #         d_env.shape[0], d_env.shape[1], d_env.shape[2])*d_env,0)
+        #    all_d.append(di)
+        #    #print('D vars')
+        #    #print(d_fea.shape, d_env.shape, nbr_d_fea.shape)
+        #    #print(di.shape)
+
+        ## shape (N, 3, atom_fea_len)
+        #all_p = torch.transpose(torch.stack(all_p),1,2)
+
+        ## shape (N, 5, atom_fea_len)
+        #all_d = torch.transpose(torch.stack(all_d),1,2)
+
+        ## shape(N, atom_fea_len)
+        #final_s = torch.stack(all_s)
+
+        # inner prod of eq(12) dimensionality doesn't seem to work out
+        # < P1 p , P2 p > \in R ?? = Tr( (P2 p)^T \dot (P1 p) )
+        # shape (N, 3, atom_fea_len)
+        p1term = torch.matmul(all_p, self.P1)
+        # shape (N, 3, atom_fea_len)
+        p2term = torch.matmul(all_p, self.P2)
+        # shape (N, atom_fea_len) via broadcasting in dim1
+        final_p =\
+            torch.sum(\
+             torch.diagonal(\
+                    torch.matmul(torch.transpose(p2term,1,2),p1term), 
+                    dim1=-2, dim2=-1),
+            dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
+
+
+        # same issue for < D1 d, D2 d >
+        # shape (N, 5, atom_fea_len)
+        d1term = torch.matmul(all_d, self.D1)
+        # shape (N, 5, atom_fea_len)
+        d2term = torch.matmul(all_d, self.D2)
+        # shape (N, atom_fea_len) via broadcasting in dim1
+        final_d =\
+            torch.sum(
+             torch.diagonal(
+                torch.matmul(torch.transpose(d2term,1,2),d1term),
+                dim1=-2, dim2=-1),
+            dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
+
+        # shape(N, atom_fea_len)
+        final_c = self.resmlp_c(atom_fea)
+
         #print(final_c)
         #print(final_s)
         #print(final_p)
         #print(final_d)
 
-        # TODO: BOTH APPROACHES MUST GIVE SAME RESULT !!!!!!
-        #print(final_s - final_s_vectorized)
-        #print('Max diff s: ', torch.max(final_s - final_s_vectorized))
-        #assert torch.allclose(final_s, final_s_vectorized, atol=1e-4)
-        #print(torch.transpose(all_p,1,2) - all_p_vectorized)
-        #print('Max diff p: ', torch.max(torch.transpose(all_p,1,2) - all_p_vectorized))
-        #assert torch.allclose(torch.transpose(all_p,1,2), all_p_vectorized, atol=1e-4)
-        ##assert torch.allclose(all_p, all_p_vectorized)
-
-
+        # TODO: BOTH APPROACHES MUST GIVE SAME RESULT ! 
+        # Why are the largest differences ~ 1e-6 
+        #final_s_nonvec = torch.stack(all_s_nonvec)
+        #print(final_s - final_s_nonvec)
+        #print(torch.where(torch.abs(final_s - final_s_nonvec)<1e-9))
+        #print('Max diff s: ', torch.max(final_s - final_s_nonvec))
+        #assert torch.allclose(final_s, final_s_nonvec)
 
         l = final_c +\
             final_s +\
