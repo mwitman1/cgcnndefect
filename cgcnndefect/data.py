@@ -199,9 +199,9 @@ def collate_pool(dataset_list):
             torch.cat(batch_pair_type, dim=0),
             torch.Tensor(batch_global_fea),
             batch_nbr_fea_idx_all,
-            torch.stack(batch_gs_fea, dim=0),
-            torch.stack(batch_gp_fea, dim=0),
-            torch.stack(batch_gd_fea, dim=0)),\
+            batch_gs_fea,#torch.stack(batch_gs_fea, dim=0)b
+            batch_gp_fea,
+            batch_gd_fea),\
         torch.stack(batch_target, dim=0),\
         stacked_Fxyz,\
         batch_cif_ids
@@ -517,7 +517,7 @@ class CIFData(Dataset):
             cif_id, target, target_Fxyz = self.id_prop_data[idx]
         else:
             cif_id, target = self.id_prop_data[idx]
-        print("Loading %d:"%idx, cif_id)
+        #print("Loading %d:"%idx, cif_id)
 
         # Base structure information
         crystal = Structure.from_file(os.path.join(self.root_dir,

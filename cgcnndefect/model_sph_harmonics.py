@@ -215,7 +215,7 @@ class SpookyLocalBlock(nn.Module):
         self.resmlp_p = ResMLP(atom_fea_len,atom_fea_len)
         self.resmlp_d = ResMLP(atom_fea_len,atom_fea_len)
 
-    def forward_nonvec(self, atom_fea : torch.Tensor,
+    def forward(self, atom_fea : torch.Tensor,
                       nbr_fea_idx : List[torch.LongTensor],
                       crystal_atom_idx : List[torch.LongTensor],
                       gs : List[torch.Tensor],
@@ -239,12 +239,12 @@ class SpookyLocalBlock(nn.Module):
         all_d = []
         for i in range(len(gs)):
             # shape (nj, atom_fea_len, 1)
-            s_env = torch.matmul(Gscopy, gs[i]) # note always 0 for padding above njmax
+            s_env = torch.matmul(self.Gs, gs[i]) # note always 0 for padding above njmax
             # shape (nj, atom_fea_len)
             nbr_s_fea = s_fea.index_select(0, nbr_fea_idx[i])
             # shape (atom_fea_len) 
             si = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,0).squeeze()
-            all_s_nonvec.append(si)
+            all_s.append(si)
             #print('S vars')
             #print(s_fea.shape, s_env.shape, nbr_s_fea.shape)
             #print(si.shape)
@@ -280,6 +280,9 @@ class SpookyLocalBlock(nn.Module):
         all_d = torch.transpose(torch.stack(all_d),1,2)
 
         # shape(N, atom_fea_len)
+        final_c = self.resmlp_c(atom_fea)
+
+        # shape(N, atom_fea_len)
         final_s = torch.stack(all_s)
 
         # inner prod of eq(12) dimensionality doesn't seem to work out
@@ -310,9 +313,6 @@ class SpookyLocalBlock(nn.Module):
                 dim1=-2, dim2=-1),
             dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
 
-        # shape(N, atom_fea_len)
-        final_c = self.resmlp_c(atom_fea)
-
         l = final_c +\
             final_s +\
             final_p +\
@@ -320,7 +320,7 @@ class SpookyLocalBlock(nn.Module):
             
         return l
 
-    def forward(self, atom_fea : torch.Tensor,
+    def forward_vec(self, atom_fea : torch.Tensor,
                       nbr_fea_idx : torch.LongTensor,
                       crystal_atom_idx : List[torch.LongTensor],
                       gs : torch.Tensor,
