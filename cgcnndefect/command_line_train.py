@@ -20,7 +20,7 @@ from .data import CIFData, CIFDataFeaturizer
 from .data import collate_pool, get_train_val_test_loader
 from .model import CrystalGraphConvNet
 from .util import save_checkpoint, AverageMeter, class_eval, mae, Normalizer
-from .model_sph_harmonics import SpookyModel
+from .model_sph_harmonics import SpookyModel, SpookyModelVectorized
 
 parser = argparse.ArgumentParser(description='Crystal Graph Convolutional Neural Networks')
 parser.add_argument('data_options', metavar='OPTIONS', nargs='+',
@@ -88,6 +88,7 @@ parser.add_argument('--n-conv', default=3, type=int, metavar='N',
 parser.add_argument('--n-h', default=1, type=int, metavar='N',
                     help='number of hidden layers after pooling')
 
+
 # New CL options added by MW
 parser.add_argument('--resultdir', default='.', type=str, metavar='N',
                     help='location to write test results')
@@ -107,6 +108,8 @@ parser.add_argument('--csv-ext', default='', type=str,
                          'specified without recopying all of the data in a diff folder')
 parser.add_argument('--model-type', default='cgcnn', type=str,
                     choices=['cgcnn','spooky'])
+parser.add_argument('--njmax', default=75, type=int, 
+                    help='Max num nbrs for sph harm featurization')
 
 
 args = parser.parse_args(sys.argv[1:])
@@ -134,7 +137,8 @@ def main():
                       crys_spec = args.crys_spec,   # MW: if global crystal features available
                       atom_spec = args.atom_spec,   # MW: if local/atom features available
                       csv_ext = args.csv_ext,       # MW: if using a specific id_prop.csv.*
-                      model_type = args.model_type) # MW: if using non-CGCNN model
+                      model_type = args.model_type, # MW: if using non-CGCNN model
+                      njmax = args.njmax)           # MW: max nbrs for sph_harm
     collate_fn = collate_pool
     train_loader, val_loader, test_loader = get_train_val_test_loader(
         dataset=dataset,
@@ -195,12 +199,23 @@ def main():
                                     all_elems=args.all_elems, #MW
                                     global_fea_len=global_fea_len) #MW
     elif args.model_type == 'spooky':
-        model = SpookyModel(orig_atom_fea_len,
-                            atom_fea_len = args.atom_fea_len,
-                            n_conv = args.n_conv,
-                            h_fea_len = args.h_fea_len,
-                            n_h = args.n_h,
-                            global_fea_len = global_fea_len) #MW
+        if args.njmax > 0:
+            model = SpookyModelVectorized(orig_atom_fea_len,
+                                          atom_fea_len = args.atom_fea_len,
+                                          n_conv = args.n_conv,
+                                          h_fea_len = args.h_fea_len,
+                                          n_h = args.n_h,
+                                          global_fea_len = global_fea_len,
+                                          njmax = args.njmax) #MW
+        else:
+            # TODO: to be discontinued once final testing done
+            model = SpookyModel(orig_atom_fea_len,
+                                atom_fea_len = args.atom_fea_len,
+                                n_conv = args.n_conv,
+                                h_fea_len = args.h_fea_len,
+                                n_h = args.n_h,
+                                global_fea_len = global_fea_len) #MW
+        
                             
 
 

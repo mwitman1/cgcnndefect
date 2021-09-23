@@ -46,19 +46,20 @@ def compute_rhok(r, k, K, rcut, gamma=0.5):
     return rhok
            
 
-def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=75):
+def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=0):
     """
     May need to optimize/vectorize as much of this as possible later on
 
-    Nc - number of atoms in crystal
-    Nj - number of neighbors of atom i
+    N - number of atoms in crystal
+    nj - number of neighbors of atom i
+    njmax - if positive, capped number of max neighbors of atom i
 
     returns 
         gs_fea : list of size N of np.arrays with shape(
     """
 
     gs_fea, gp_fea, gd_fea = [], [], []
-    nbr_dist, nbr_fea_idx, nbr_vec = [], [], []
+    nbr_dist, nbr_vec = [], []
     nbr_angles = []
     for i, nbrs in enumerate(all_nbrs):
         # Using sph_harm basis set, no longer need to artifically cap the 
@@ -68,16 +69,18 @@ def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=75):
         # of all operations despite the non-constant num of neighbors between atoms
         # Therefore, a present njmax is being used, and program will automatically
         # exit if more neighbors exist in the cutoff than 
-        if len(nbrs) >= njmax:
-            raise ValueError("Error! You're chosen cutoff contains more than max num of possible neighbors")
+        if len(nbrs) >= njmax and njmax != 0:
+            raise ValueError("Warning! You're max num of possible neighbors is not sufficient to capture all neighbors within the requested cutoff!")
 
         # variable number of neighbors w/in site for each site
-        nbr_fea_idx.append([nbr[2] for nbr in nbrs])
+        #nbr_fea_idx.append([nbr[2] for nbr in nbrs])
          
         # Need to be especially careful to use Pymatgen Periodic neighbor
         # to get correct distance vector
         icoords = structure[i].coords
         nbr_vec = np.array([nbr[0].coords-icoords for nbr in nbrs])
+        #if i == 0:
+        #    print(np.sort(np.linalg.norm(nbr_vec,axis=1)))
         r, polar, azimuth = polar_coords(nbr_vec)
         
         # nbr_gx_ ... with shape (nj,)
@@ -101,13 +104,13 @@ def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=75):
 
         # nbr_gs_fea with shape(nj, K)
         nbr_gs_fea=(nbr_gs_0_0*nbr_rhok).T[..., np.newaxis]
-        nbr_gs_fea_pad=np.zeros((njmax-len(nbrs),K,1))
+
 
         # nbr_gp_fea with shape(nj, K, 3)
         nbr_gp_fea=np.stack(((nbr_gp_1_n1*nbr_rhok).T,
                              (nbr_gp_1_0*nbr_rhok).T,
                              (nbr_gp_1_1*nbr_rhok).T),axis=2)
-        nbr_gp_fea_pad=np.zeros((njmax-len(nbrs),K,3))
+
 
         
         # nbr_gp_fea with shape(nj, K, 5)
@@ -116,7 +119,7 @@ def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=75):
                              (nbr_gd_2_0*nbr_rhok).T,
                              (nbr_gd_2_1*nbr_rhok).T,
                              (nbr_gd_2_2*nbr_rhok).T),axis=2)
-        nbr_gd_fea_pad=np.zeros((njmax-len(nbrs),K,5))
+
 
         # Checks
         #--------------------------------------------------------------------
@@ -152,17 +155,24 @@ def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=75):
         #assert(np.isclose(nbr_gd_fea[-1,1,4],nbr_gd_2_2[-1]*nbr_rhok[1,-1]))
         #--------------------------------------------------------------------
 
-        #gs_fea.append(torch.Tensor(nbr_gs_fea).unsqueeze(-1))
-        #gp_fea.append(torch.Tensor(nbr_gp_fea))
-        #gd_fea.append(torch.Tensor(nbr_gd_fea))
+        if njmax > 0:
+            # padding 0's up to njmax so that can be vectorized
+            nbr_gs_fea_pad=np.zeros((njmax-len(nbrs),K,1))
+            nbr_gp_fea_pad=np.zeros((njmax-len(nbrs),K,3))
+            nbr_gd_fea_pad=np.zeros((njmax-len(nbrs),K,5))
 
-        # if padding 0's up to njmax
-        gs_fea.append(torch.Tensor(np.concatenate((nbr_gs_fea,nbr_gs_fea_pad),axis=0)))
-        gp_fea.append(torch.Tensor(np.concatenate((nbr_gp_fea,nbr_gp_fea_pad),axis=0)))
-        gd_fea.append(torch.Tensor(np.concatenate((nbr_gd_fea,nbr_gd_fea_pad),axis=0)))
+            gs_fea.append(torch.Tensor(np.concatenate((nbr_gs_fea,nbr_gs_fea_pad),axis=0)))
+            gp_fea.append(torch.Tensor(np.concatenate((nbr_gp_fea,nbr_gp_fea_pad),axis=0)))
+            gd_fea.append(torch.Tensor(np.concatenate((nbr_gd_fea,nbr_gd_fea_pad),axis=0)))
+        else:
+            gs_fea.append(torch.Tensor(nbr_gs_fea))
+            gp_fea.append(torch.Tensor(nbr_gp_fea))
+            gd_fea.append(torch.Tensor(nbr_gd_fea))
 
-
+    # returning lists of tensors here keeps things flexible for later on,
+    # regardless of njmax specification
     return gs_fea, gp_fea, gd_fea
+
 
 class Residual(nn.Module):
     def __init__(self,fea_len_in, fea_len_out):
@@ -217,7 +227,6 @@ class SpookyLocalBlock(nn.Module):
 
     def forward(self, atom_fea : torch.Tensor,
                       nbr_fea_idx : List[torch.LongTensor],
-                      crystal_atom_idx : List[torch.LongTensor],
                       gs : List[torch.Tensor],
                       gp : List[torch.Tensor],
                       gd : List[torch.Tensor]):
@@ -320,31 +329,58 @@ class SpookyLocalBlock(nn.Module):
             
         return l
 
-    def forward_vec(self, atom_fea : torch.Tensor,
+class SpookyLocalBlockVectorized(nn.Module):
+
+    def __init__(self, atom_fea_len, K, njmax):
+        super(SpookyLocalBlockVectorized, self).__init__()
+        self.atom_fea_len = atom_fea_len
+        self.F = atom_fea_len
+        self.K = K
+        self.njmax = njmax
+
+        self.Gs = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
+        self.Gp = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
+        self.Gd = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,K)))
+
+        self.P1 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.P2 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.D1 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+        self.D2 = nn.init.uniform_(nn.Parameter(torch.Tensor(atom_fea_len,atom_fea_len)))
+
+        self.resmlp_c = ResMLP(atom_fea_len,atom_fea_len)
+        self.resmlp_s = ResMLP(atom_fea_len,atom_fea_len)
+        self.resmlp_p = ResMLP(atom_fea_len,atom_fea_len)
+        self.resmlp_d = ResMLP(atom_fea_len,atom_fea_len)
+
+    def forward(self, atom_fea : torch.Tensor,
                       nbr_fea_idx : torch.LongTensor,
-                      crystal_atom_idx : List[torch.LongTensor],
                       gs : torch.Tensor,
                       gp : torch.Tensor,
                       gd : torch.Tensor):
 
         """
         N : number of atoms in batch
-        N0 : number of crystals in batch
-        nc : number of atoms in crystal c in crystal_atom_idx
-        nj : number of neighbors to atom i in batch
+        njmax : max number of neighbors to an atom for sph_harm
         F : atom feacture vector length
+        K : order of polynomials
 
-        atom_fea : Variable(torch.Tensor) shape (N, atom_fea_len)
-        nbr_fea_idx : List(torch.LongTensor) of len(N) with shape(nj)
-        crystal_atom_idx : List(torch.LongTensor) of len(N) with shape(nc)
+        atom_fea : torch.Tensor of shape (N, F)
+            -> init feature vectors of all atoms in the batch
+        nbr_fea_idx : torch.LongTensor of shape (N*njmax)
+            -> indices of all neighbors W.R.T. the batch (NOT the crystal)
+            -> note that the padding of neighbors beyond the cutoff (up to njmax) stores
+               a dummy index corresponding to that cyrstal's first atom's index
+               in the batch. Ultimately doesn't matter b/c gs, gp, and gd
+               values are padded with 0s for any such nbs beyond the cutoff 
+               up to njmax
+        gs : torch.Tensor of shape(N, nj, K, 1)
+        gp : torch.Tensor of shape(N, nj, K, 3)
+        gd : torch.Tensor of shape(N, nj, K, 5)
 
-        gs : List(torch.Tensor) of len (N) with shape(nj, K)
-        gp : List(torch.Tensor) of len (N) with shape(nj, K, 3)
-        gd : List(torch.Tensor) of len (N) with shape(nj, K, 5)
+        returns
+        l : torch.Tensor of shape (N,F)
 
         """
-        # TODO : need conversion from crystal_atom_idx to nbr_fea_idx
-        # for when there are multiple different crystals in the batch
 
         # shape (N, F)
         s_fea = self.resmlp_s(atom_fea)
@@ -360,9 +396,8 @@ class SpookyLocalBlock(nn.Module):
         #print(self.Gs.expand(len(gs),gs[0].shape[0],self.Gs.shape[0],self.Gs.shape[1]).shape)
         #print(torch.stack(gs,dim=0).shape, len(gs))
         # shape (N, njmax, F, 1)
-        Gscopy = deepcopy(self.Gs)
         s_env = torch.matmul(self.Gs.expand(len(gs), # N
-                                            gs[0].shape[0], # njmax
+                                            self.njmax, # njmax
                                             self.F, # F
                                             self.K), # K 
                              gs) # (N, njmax, K, 1)
@@ -372,8 +407,8 @@ class SpookyLocalBlock(nn.Module):
         #nbr_s_fea = torch.stack([s_fea.index_select(0,nbr_fea_idx[i])\
         #                         for i in range(len(nbr_fea_idx))])
         nbr_s_fea =\
-            s_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
-                len(gs), gs[0].shape[0], self.F)
+            s_fea.index_select(0,nbr_fea_idx).reshape(\
+                len(gs), self.njmax, self.F)
         #assert torch.allclose(nbr_s_fea, nbr_s_fea_nonvec)
         #print(nbr_s_fea.shape)
 
@@ -384,7 +419,7 @@ class SpookyLocalBlock(nn.Module):
 
         # shape (N, nj, F, 3)
         p_env = torch.matmul(self.Gp.expand(len(gs), # N
-                                            gp[0].shape[0], # njmax
+                                            self.njmax, # njmax
                                             self.F, # F
                                             self.K), # K
                              gp) # (N, njmax, K, 3)
@@ -395,8 +430,8 @@ class SpookyLocalBlock(nn.Module):
         #nbr_p_fea = torch.stack([p_fea.index_select(0, nbr_fea_idx[i])\
         #                        for i in range(len(nbr_fea_idx))])
         nbr_p_fea =\
-            p_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
-                len(gp), gp[0].shape[0], self.F)
+            p_fea.index_select(0,nbr_fea_idx).reshape(\
+                len(gp), self.njmax, self.F)
         #print(nbr_p_fea.shape)
 
         # shape (N, F, 3)  
@@ -410,7 +445,7 @@ class SpookyLocalBlock(nn.Module):
 
         # shape (N, nj, F, 5)
         d_env = torch.matmul(self.Gd.expand(len(gd), # N
-                                            gd[0].shape[0], # njmax
+                                            self.njmax, # njmax
                                             self.F, # F
                                             self.K), # K
                              gd) # (N, njmax, K, 5)
@@ -420,8 +455,8 @@ class SpookyLocalBlock(nn.Module):
         #nbr_d_fea = torch.stack([d_fea.index_select(0, nbr_fea_idx[i])\
         #                        for i in range(len(nbr_fea_idx))])
         nbr_d_fea =\
-            d_fea.index_select(0,torch.cat(nbr_fea_idx,dim=0)).reshape(\
-                len(gd), gd[0].shape[0], self.F)
+            d_fea.index_select(0,nbr_fea_idx).reshape(\
+                len(gd), self.njmax, self.F)
 
         # shape (N, F, 5) 
         all_d_vectorized = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
@@ -429,57 +464,6 @@ class SpookyLocalBlock(nn.Module):
 
         # shape (N, 5, F) 
         all_d = torch.transpose(all_d_vectorized,1,2)
-
-
-        # OPTION 2: non-vectorized version
-        # -> nonvectorized version, if nj is diff for each atomic environment
-        #all_s_nonvec = []
-        #all_p = []
-        #all_d = []
-        #for i in range(len(gs)):
-        #    # shape (nj, atom_fea_len, 1)
-        #    s_env = torch.matmul(Gscopy, gs[i]) # note always 0 for padding above njmax
-        #    # shape (nj, atom_fea_len)
-        #    nbr_s_fea = s_fea.index_select(0, nbr_fea_idx[i])
-        #    # shape (atom_fea_len) 
-        #    si = torch.sum(nbr_s_fea.unsqueeze(-1)*s_env,0).squeeze()
-        #    all_s_nonvec.append(si)
-        #    #print('S vars')
-        #    #print(s_fea.shape, s_env.shape, nbr_s_fea.shape)
-        #    #print(si.shape)
-
-        #    # shape (nj, atom_fea_len, 3)
-        #    p_env = torch.matmul(self.Gp, gp[i])
-        #    # shape (nj, atom_fea_len)
-        #    nbr_p_fea = p_fea.index_select(0, nbr_fea_idx[i])
-        #    # shape (atom_fea_len, 3) 
-        #    pi = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
-        #         p_env.shape[0], p_env.shape[1], p_env.shape[2])*p_env,0)
-        #    all_p.append(pi)
-        #    #print('P vars')
-        #    #print(p_fea.shape, p_env.shape, nbr_p_fea.shape)
-        #    #print(pi.shape)
-
-        #    # shape (nj, atom_fea_len, 5)
-        #    d_env = torch.matmul(self.Gd, gd[i])
-        #    # shape (nj, atom_fea_len)
-        #    nbr_d_fea = d_fea.index_select(0, nbr_fea_idx[i])
-        #    # shape (atom_fea_len, 5) 
-        #    di = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
-        #         d_env.shape[0], d_env.shape[1], d_env.shape[2])*d_env,0)
-        #    all_d.append(di)
-        #    #print('D vars')
-        #    #print(d_fea.shape, d_env.shape, nbr_d_fea.shape)
-        #    #print(di.shape)
-
-        ## shape (N, 3, atom_fea_len)
-        #all_p = torch.transpose(torch.stack(all_p),1,2)
-
-        ## shape (N, 5, atom_fea_len)
-        #all_d = torch.transpose(torch.stack(all_d),1,2)
-
-        ## shape(N, atom_fea_len)
-        #final_s = torch.stack(all_s)
 
         # inner prod of eq(12) dimensionality doesn't seem to work out
         # < P1 p , P2 p > \in R ?? = Tr( (P2 p)^T \dot (P1 p) )
@@ -541,16 +525,33 @@ class SpookyConv(nn.Module):
         self.spookylocal = SpookyLocalBlock(atom_fea_len, K)
         
 
-    def forward(self, atom_fea, nbr_fea_idx, crystal_atom_idx,
+    def forward(self, atom_fea, nbr_fea_idx, 
                       gs_fea, gp_fea, gd_fea):
 
         intermed_atom_fea = self.res1(atom_fea)
         local = self.spookylocal(intermed_atom_fea, nbr_fea_idx,
-                                 crystal_atom_idx, gs_fea, gp_fea, gd_fea)
+                                 gs_fea, gp_fea, gd_fea)
         atom_fea = self.res2(intermed_atom_fea + local)
         
         return atom_fea
 
+class SpookyConvVectorized(nn.Module):
+    def __init__(self, atom_fea_len, K, njmax):
+        super(SpookyConvVectorized, self).__init__()
+
+        self.res1 = Residual(atom_fea_len, atom_fea_len)
+        self.res2 = Residual(atom_fea_len, atom_fea_len)
+        self.spookylocal = SpookyLocalBlockVectorized(atom_fea_len, K, njmax)
+
+    def forward(self, atom_fea, nbr_fea_idx, 
+                      gs_fea, gp_fea, gd_fea):
+
+        intermed_atom_fea = self.res1(atom_fea)
+        local = self.spookylocal(intermed_atom_fea, nbr_fea_idx,
+                                 gs_fea, gp_fea, gd_fea)
+        atom_fea = self.res2(intermed_atom_fea + local)
+        
+        return atom_fea
 
 class SpookyModel(nn.Module):
 
@@ -561,7 +562,12 @@ class SpookyModel(nn.Module):
         self.n_h = n_h
 
         self.embedding = nn.Linear(orig_atom_fea_len, atom_fea_len)
-        
+       
+        # Note, njmax is used as switch for vectorized version (significantly faster)
+        # When njmax > 0,  assumes 0 padding up to njmax in gs, gp, gd
+        # which will be tensors of shape (N, njmax, ...)
+        # When njmax = 0, each atom has a variable number of neighboris in gs, gp, gd
+        # which will be lists of len(N) of tensor with shape (nj, ...)
         self.convs = nn.ModuleList([SpookyConv(atom_fea_len=atom_fea_len,
                                                K = K)
                                    for _ in range(n_conv)])
@@ -581,7 +587,7 @@ class SpookyModel(nn.Module):
 
         # pass throuch n_conv SpookyConv blocks
         for conv_func in self.convs:
-            atom_fea = conv_func(atom_fea, nbr_fea_idx, crystal_atom_idx,
+            atom_fea = conv_func(atom_fea, nbr_fea_idx, 
                                  gs_fea, gp_fea, gd_fea)
 
         crys_fea = self.pooling(atom_fea, crystal_atom_idx)
@@ -614,6 +620,262 @@ class SpookyModel(nn.Module):
 
         return torch.cat(summed_fea,dim=0)
 
+class SpookyModelVectorized(nn.Module):
+
+    def __init__(self, orig_atom_fea_len, atom_fea_len=64, n_conv=3, 
+                       h_fea_len=128, n_h=1, K=4, all_elems = [0], global_fea_len=0,
+                       njmax = 75):
+        super(SpookyModelVectorized, self).__init__()
+
+        self.n_h = n_h
+
+        self.embedding = nn.Linear(orig_atom_fea_len, atom_fea_len)
+       
+        # Note, njmax is used as switch for vectorized version (significantly faster)
+        # When njmax > 0,  assumes 0 padding up to njmax in gs, gp, gd
+        # which will be tensors of shape (N, njmax, ...)
+        # When njmax = 0, each atom has a variable number of neighboris in gs, gp, gd
+        # which will be lists of len(N) of tensor with shape (nj, ...)
+        self.convs = nn.ModuleList([SpookyConvVectorized(atom_fea_len=atom_fea_len,
+                                                         K = K,
+                                                         njmax = njmax)\
+                                   for _ in range(n_conv)])
+
+        self.conv_to_fc = InvertedLinear(atom_fea_len+global_fea_len, h_fea_len)
+
+        if n_h > 1:
+            self.fcs = nn.ModuleList([InvertedLinear(h_fea_len,h_fea_len)
+                                      for _ in range(n_h-1)])
+
+        self.fc_out = InvertedLinear(h_fea_len, 1)
+    
+    def forward(self, atom_fea, nbr_fea_idx, crystal_atom_idx,
+                      gs_fea, gp_fea, gd_fea, global_fea):
+        # embedding
+        atom_fea = self.embedding(atom_fea)
+
+        # pass throuch n_conv SpookyConv blocks
+        for conv_func in self.convs:
+            atom_fea = conv_func(atom_fea, nbr_fea_idx, 
+                                 gs_fea, gp_fea, gd_fea)
+
+        crys_fea = self.pooling(atom_fea, crystal_atom_idx)
+
+        crys_fea = self.conv_to_fc(torch.cat([crys_fea, global_fea],dim=1))
+
+        if self.n_h > 1:
+            for fc in self.fcs:
+                crys_fea = fc(crys_fea)
+
+        out = self.fc_out(crys_fea)
+
+        return [out]
+
+    def pooling(self, atom_fea : torch.Tensor,
+                      crystal_atom_idx : List[torch.Tensor]):
+
+        # TODO implement flexibility for pooling type from function arguments
+
+        # If pooling requires a summing/avging/etc over all atoms in crystal
+        #summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
+        #              for idx_map in crystal_atom_idx]
+
+        # If, instead of pooling, simply want the feature vec of a single atom
+        summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
+                      for idx_map in crystal_atom_idx]
+
+        # If we want to pool the feature vecs of only select atoms
+        # etc
+
+        return torch.cat(summed_fea,dim=0)
+
+
+
+def debug_featurization_single(crystal, cutoff, atom_fea_len, 
+                               K, njmax, orig_atom_fea_len, seed):
+
+    torch.manual_seed(seed)
+
+    ########################################################################
+    # example for one crystal
+    ########################################################################
+    t0 = time.time()
+    all_nbrs = crystal.get_all_neighbors(cutoff, include_index=True)
+    print('Num neighs detected for atom 0: ', len(all_nbrs[0]))
+
+    # some dummy atom feature vectors mapped to the input size of the conv layer 
+    dummy_init_atom_fea = torch.Tensor(\
+        [[crystal[i].specie.number for _ in range(atom_fea_len)]\
+         for i in range(len(crystal))])
+
+    # dummy atom features input to model (i.e. embedding layer)
+    dummy_orig_atom_fea = torch.zeros((len(crystal),orig_atom_fea_len))
+    for i in range(len(crystal)):
+        dummy_orig_atom_fea[i,crystal[i].specie.number] = 1
+
+    # indices of all neighbors    
+    if njmax > 0:
+        # nbr_fea_idx padded with 0s up to njmax for vectorized
+        nbr_fea_idx = [torch.LongTensor(list(map(lambda x: x[2],nbr))\
+                       + [0] * (njmax - len(nbr)))\
+                       for nbr in all_nbrs]
+    else:
+        nbr_fea_idx = [torch.LongTensor(list(map(lambda x: x[2],nbr)))\
+                       for nbr in all_nbrs]
+
+    crystal_atom_idx = [torch.LongTensor(np.arange(len(crystal)))]
+    t0e = time.time()
+
+    # time the featurization
+    t1 = time.time()
+    gs_fea, gp_fea, gd_fea = get_harmonics_fea(crystal, all_nbrs, 
+                                               K, cutoff, njmax)
+    t1e = time.time()
+
+    # test the isolated convolutional block
+    if njmax > 0:
+        gs_fea = torch.stack(gs_fea,dim=0)
+        gp_fea = torch.stack(gp_fea,dim=0)
+        gd_fea = torch.stack(gd_fea,dim=0)
+        nbr_fea_idx = torch.cat(nbr_fea_idx,dim=0)
+
+        l1 = SpookyLocalBlockVectorized(atom_fea_len, K, njmax)
+        out_conv = l1.forward(dummy_init_atom_fea, nbr_fea_idx,  
+                         gs_fea, gp_fea, gd_fea)
+    else:
+        l1 = SpookyLocalBlock(atom_fea_len, K)
+        out_conv = l1.forward(dummy_init_atom_fea, nbr_fea_idx,  
+                         gs_fea, gp_fea, gd_fea)
+
+    if njmax > 0:
+        # time entire model evaluation (for 1 crystal)
+        model = SpookyModelVectorized(orig_atom_fea_len = orig_atom_fea_len,
+                                      atom_fea_len = atom_fea_len,
+                                      h_fea_len = 16,
+                                      n_h=2,
+                                      global_fea_len=2,
+                                      njmax = njmax)
+    else:
+        model = SpookyModel(orig_atom_fea_len = orig_atom_fea_len,
+                            atom_fea_len = atom_fea_len,
+                            h_fea_len = 16,
+                            n_h=2,
+                            global_fea_len=2)
+        
+
+    model.eval()
+    global_fea = torch.Tensor([[1,2]])
+
+    t2 = time.time()
+    out_model = model.forward(dummy_orig_atom_fea, nbr_fea_idx, crystal_atom_idx, 
+                              gs_fea, gp_fea, gd_fea, global_fea)
+    t2e = time.time()
+    #print(model.convs[0].spookylocal.Gs)
+
+    #print(out_model)
+    print('Crystal processing time: ', t0e-t0)
+    print('Featurization time: ', t1e-t1)
+    print('Model time: ', t2e-t2)
+
+    return gs_fea, gp_fea, gd_fea, out_conv, out_model
+
+def debug_featurization_batch(crystal_batch, cutoff, atom_fea_len, 
+                               K, njmax, orig_atom_fea_len, seed):
+
+    torch.manual_seed(seed)
+
+    ########################################################################
+    # example for batch of crytals
+    ########################################################################
+    batch_orig_atom_fea, batch_atom_fea, batch_nbr_fea_idx, batch_crystal_atom_idx = [], [], [], []
+    batch_gs_fea, batch_gp_fea, batch_gd_fea  = [], [], []
+    batch_global_fea = []
+
+    batch_size = len(crystal_batch)
+    base_idx = 0
+    for i,crystal in enumerate(crystal_batch):
+        n_i = len(crystal_batch[i])
+        all_nbrs = crystal.get_all_neighbors(cutoff, include_index=True)
+        batch_crystal_atom_idx.append(torch.LongTensor(np.arange(n_i)+base_idx))
+      
+        # dummy atom features input to model (i.e. embedding layer)
+        orig_atom_fea = torch.zeros((len(crystal),orig_atom_fea_len))
+        for j in range(len(crystal)):
+            orig_atom_fea[j,crystal[j].specie.number] = 1
+        batch_orig_atom_fea.append(orig_atom_fea)
+ 
+        # some dummy atom feature vectors mapped to the input size of the conv layer 
+        batch_atom_fea.append(
+            torch.Tensor([[crystal[i].specie.number for _ in range(atom_fea_len)]\
+                         for i in range(len(crystal))])
+        )
+
+        # indices of all neighbors    
+        if njmax > 0:
+            batch_nbr_fea_idx+=[base_idx + torch.LongTensor(list(map(lambda x: x[2],nbr))\
+                                                            + [0]*(njmax-len(nbr)))\
+                                for nbr in all_nbrs]
+        else:
+            batch_nbr_fea_idx+=[base_idx + torch.LongTensor(list(map(lambda x: x[2],nbr)))\
+                                for nbr in all_nbrs]
+        
+        gs_fea, gp_fea, gd_fea = get_harmonics_fea(crystal, all_nbrs, 
+                                                   K, cutoff, njmax)
+
+        batch_gs_fea+=gs_fea
+        batch_gp_fea+=gp_fea
+        batch_gd_fea+=gd_fea
+
+        base_idx += n_i
+
+    batch_orig_atom_fea = torch.cat(batch_orig_atom_fea, dim=0)
+    batch_atom_fea = torch.cat(batch_atom_fea, dim=0)
+    batch_global_fea = torch.stack([torch.Tensor([1,2])\
+                                     for _ in range(batch_size)], dim=0)
+
+
+    # test the isolated convolutional block
+    if njmax > 0:
+        batch_gs_fea = torch.stack(batch_gs_fea,dim=0)
+        batch_gp_fea = torch.stack(batch_gp_fea,dim=0)
+        batch_gd_fea = torch.stack(batch_gd_fea,dim=0)
+        batch_nbr_fea_idx = torch.cat(batch_nbr_fea_idx,dim=0)
+        
+        l1 = SpookyLocalBlockVectorized(atom_fea_len, K, njmax)
+        out_conv = l1.forward(batch_atom_fea, batch_nbr_fea_idx, 
+                              batch_gs_fea, batch_gp_fea, batch_gd_fea)
+    else:
+        l1 = SpookyLocalBlock(atom_fea_len, K)
+        out_conv = l1.forward(batch_atom_fea, batch_nbr_fea_idx, 
+                             batch_gs_fea, batch_gp_fea, batch_gd_fea)
+
+
+    # test the full model pass
+    if njmax > 0:
+        model = SpookyModelVectorized(orig_atom_fea_len = orig_atom_fea_len,
+                            atom_fea_len = atom_fea_len,
+                            h_fea_len = 16,
+                            n_h = 2,
+                            global_fea_len = 2,
+                            njmax = njmax)
+    else:
+        model = SpookyModel(orig_atom_fea_len = orig_atom_fea_len,
+                            atom_fea_len = atom_fea_len,
+                            h_fea_len = 16,
+                            n_h = 2,
+                            global_fea_len = 2)
+    model.eval()
+
+    t3 = time.time()
+    out_model = model.forward(batch_orig_atom_fea, batch_nbr_fea_idx, batch_crystal_atom_idx,
+                             batch_gs_fea, batch_gp_fea, batch_gd_fea, batch_global_fea)
+    t3e = time.time()
+    print('Model time: ', t3e-t3)
+
+    #print(model.convs[0].spookylocal.Gs)
+
+    return batch_gs_fea, batch_gp_fea, batch_gd_fea, out_model
+
 if __name__ == "__main__":
 
     ########################################################################
@@ -622,100 +884,73 @@ if __name__ == "__main__":
     cutoff=5.5
     atom_fea_len = 8
     K=4
-    ciffile = sys.argv[1]
     num_crystal = 2
-    njmax=50
-    torch.manual_seed(0)
+    njmax=0
+    orig_atom_fea_len = 92
+    seed = 0
 
     ########################################################################
-    # example for one crystal
+    # Some crystal structures, uc and supercell representation 
     ########################################################################
-    t0 = time.time()
+    ciffile = sys.argv[1]
     crystal = Structure.from_file(ciffile)
-    crystal_batch = [crystal for _ in range(num_crystal)]
-    #all_atom_types = [crystal[i].specie.symbol for i in range(len(crystal))]
-    all_nbrs = crystal.get_all_neighbors(cutoff, include_index=True)
+    supercrystal = crystal *(5,5,5)
 
-    # network inputs
-    dummy_init_atom_fea = torch.Tensor([[i for _ in range(atom_fea_len)]\
-                                 for i in range(len(crystal))])
-    nbr_fea_idx = [torch.LongTensor(list(map(lambda x: x[2],nbr))+\
-                   [0] * (njmax - len(nbr)))\
-                   for nbr in all_nbrs]
+    print('\nDebug single supercell featurization:')
+    gs_superuc, gp_superuc, gd_superuc, out_conv_superuc, out_model_superuc =\
+        debug_featurization_single(supercrystal, cutoff, atom_fea_len, 
+                                   K, njmax, orig_atom_fea_len, seed)
 
-    crystal_atom_idx = [torch.LongTensor(np.arange(len(crystal)))]
-    t0e = time.time()
+    print('\nDebug single uc featurization:')
+    gs_uc, gp_uc, gd_uc, out_conv_uc, out_model_uc =\
+        debug_featurization_single(crystal, cutoff, atom_fea_len, 
+                                   K, njmax, orig_atom_fea_len, seed)
+    
+    # This actually won't help b/c the nbr order becomes different
+    # based on the size of the uc representation
+    #assert torch.allclose(gs_uc[0], gs_superuc[0])
 
-    # time the featurization
-    t1 = time.time()
-    gs_fea, gp_fea, gd_fea = get_harmonics_fea(crystal, all_nbrs, 
-                                               K, cutoff)
-    t1e = time.time()
+    # Pymatgen supercells by [atom0]*num_reps + [atom1]*num_reps + ...
+    #print([crystal[i].specie.number for i in range(len(crystal))])
+    #print([supercrystal[i].specie.number for i in range(len(supercrystal))])
 
-    # time a single convolution operation
-    l1 = SpookyLocalBlock(atom_fea_len,K)
-    out = l1.forward(dummy_init_atom_fea, nbr_fea_idx, crystal_atom_idx, 
-                     gs_fea, gp_fea, gd_fea)
+    # e.g. for any crystal with at least 2 atoms
+    assert torch.allclose(out_conv_uc[0],out_conv_superuc[0])
+    assert torch.allclose(out_conv_uc[-1],out_conv_superuc[-1])
 
-    # time entire model evaluation (for 1 crystal)
-    model = SpookyModel(orig_atom_fea_len = atom_fea_len,
-                        atom_fea_len = atom_fea_len,
-                        h_fea_len = 16,
-                        n_h=2,
-                        global_fea_len=2)
-
-    model.eval()
-    global_fea = torch.Tensor([[1,2]])
-    t2 = time.time()
-    out = model.forward(dummy_init_atom_fea, nbr_fea_idx, crystal_atom_idx, 
-                        gs_fea, gp_fea, gd_fea, global_fea)
-    t2e = time.time()
-
-    print(out)
-    print('Crystal processing time: ', t1e-t1)
-    print('Featurization time: ', t1e-t1)
-    print('Model time: ', t2e-t2)
+    # e.g. atom feature vector can't depend on supercell size
+    assert torch.allclose(out_model_uc[0], out_model_superuc[0])
+    print('\nCompare defect model output of single vs supercell featurization:')
+    print(out_model_uc, out_model_superuc)
 
 
-    ########################################################################
-    # example for one crystal
-    ########################################################################
+    print('\nDebug batch uc featurization:')
+    crystal_batch = [crystal, supercrystal]*10
+    _, _, _, out_model = debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
+                                                   K, njmax, orig_atom_fea_len, seed)
+    print(out_model)
 
-    # example for batch of crytals
-    batch_atom_fea, batch_nbr_fea_idx, batch_crystal_atom_idx = [], [], []
-    batch_gs_fea, batch_gp_fea, batch_gd_fea  = [], [], []
-    batch_global_fea = []
 
-    batch_size = len(crystal_batch)
-    base_idx = 0
-    for i,crystal in enumerate(crystal_batch):
-        n_i = len(crystal_batch[i])
-        batch_crystal_atom_idx.append(torch.LongTensor(np.arange(n_i)+base_idx))
-        
-        batch_atom_fea.append(torch.Tensor([[i for _ in range(atom_fea_len)]\
-                                            for i in range(len(crystal))]))
-        batch_nbr_fea_idx+=[base_idx + torch.LongTensor(list(map(lambda x: x[2],nbr))+\
-                                                        [0]*(njmax-len(nbr)))\
-                            for nbr in all_nbrs]
-        
-        gs_fea, gp_fea, gd_fea = get_harmonics_fea(crystal, all_nbrs, 
-                                                   K, cutoff)
+    njmax = 50
+    print('\nDebug single supercell VECTORIZED featurization (njmax=%d):'%njmax)
+    gs_superuc, gp_superuc, gd_superuc, out_conv_superuc, out_model_superuc =\
+        debug_featurization_single(supercrystal, cutoff, atom_fea_len, 
+                                   K, njmax, orig_atom_fea_len, seed)
+    print(out_model_uc, out_model_superuc)
 
-        batch_gs_fea+=gs_fea
-        batch_gp_fea+=gp_fea
-        batch_gd_fea+=gd_fea
+    print('\nDebug single uc VECTORIZED featurization (njmax=%d):'%njmax)
+    gs_uc, gp_uc, gd_uc, out_conv_uc, out_model_uc =\
+        debug_featurization_single(crystal, cutoff, atom_fea_len, 
+                                   K, njmax, orig_atom_fea_len, seed)
 
-        base_idx += n_i
 
-    batch_atom_fea = torch.cat(batch_atom_fea, dim=0)
-    batch_global_fea = torch.stack([torch.Tensor([1,2]) for _ in range(batch_size)], dim=0)
-    target = torch.stack([torch.Tensor([1]) for _ in range(batch_size)], dim=0)
+    print('\nDebug batch uc VECTORIZED featurization (njmax=%d):'%njmax)
+    _, _, _, out_model = debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
+                                                   K, njmax, orig_atom_fea_len, seed)
+    print(out_model)
 
-    t3 = time.time()
-    out = model.forward(batch_atom_fea, batch_nbr_fea_idx, batch_crystal_atom_idx,
-                        batch_gs_fea, batch_gp_fea, batch_gd_fea, batch_global_fea)
-    t3e = time.time()
-    print('Model forward (2 crystals): ', t3e-t3)
+
+
 
     #optimizer = torch.optim.Adam(model.parameters(), 0.05)
     #optimizer.zero_grad()

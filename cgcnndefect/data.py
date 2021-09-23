@@ -189,6 +189,8 @@ def collate_pool(dataset_list):
     #print(batch_global_fea)
     #print(np.where([len(v)==2 for v in batch_global_fea]))
     #print(np.array(batch_cif_ids)[np.where([len(v)==2 for v in batch_global_fea])[0]])
+    #print(torch.stack(batch_gs_fea, dim=0).shape)
+    #print(torch.cat(batch_nbr_fea_idx_all, dim=0).shape)
     return (torch.cat(batch_atom_fea, dim=0),
             torch.cat(batch_nbr_fea, dim=0),
             torch.cat(batch_nbr_fea_idx, dim=0),
@@ -198,10 +200,10 @@ def collate_pool(dataset_list):
             torch.cat(batch_nbr_dist, dim=0),
             torch.cat(batch_pair_type, dim=0),
             torch.Tensor(batch_global_fea),
-            batch_nbr_fea_idx_all,
-            batch_gs_fea,#torch.stack(batch_gs_fea, dim=0)b
-            batch_gp_fea,
-            batch_gd_fea),\
+            torch.cat(batch_nbr_fea_idx_all,dim=0),# NOTE, if nonvec version, must stay list 
+            torch.stack(batch_gs_fea, dim=0),      # NOTE, if nonvec version, must stay list
+            torch.stack(batch_gp_fea, dim=0),      # NOTE, if nonvec version, must stay list
+            torch.stack(batch_gd_fea, dim=0)),\
         torch.stack(batch_target, dim=0),\
         stacked_Fxyz,\
         batch_cif_ids
@@ -421,7 +423,7 @@ class CIFData(Dataset):
                  csv_ext = '',
                  model_type='cgcnn',
                  K = 4,
-                 maxnj=75):
+                 njmax=75):
         self.root_dir = root_dir
         self.Fxyz = Fxyz
         self.all_elems = all_elems
@@ -438,7 +440,7 @@ class CIFData(Dataset):
         else:
             self.compute_sph_harm = False
         self.K = K
-        self.maxnj = maxnj # max neighs for sph_harm
+        self.njmax = njmax # max neighs for sph_harm #TODO handle non-padding scenario of njmax=0
 
         self.reload_data()
 
@@ -771,7 +773,7 @@ class CIFData(Dataset):
                     # duplicate nbr_fea_idx but for ALL nbrs (no max #) 
                     nbr_fea_idx_all.append(\
                         torch.LongTensor(list(map(lambda x: x[2],nbr))+\
-                                         [0] * (self.maxnj - len(nbr)))
+                                         [0] * (self.njmax - len(nbr)))
                     )
                 else:
                     # dummy data now for compatibility, need to just do 
@@ -782,9 +784,10 @@ class CIFData(Dataset):
         if self.compute_sph_harm:        
             # compute gs, gp, gd for all atoms in crystal here
             gs_fea, gp_fea, gd_fea =\
-                get_harmonics_fea(crystal, all_nbrs, self.K, self.radius)
+                get_harmonics_fea(crystal, all_nbrs, self.K, self.radius, self.njmax)
         else:
-            gs_fea, gp_fea, gd_fea = [None], [None], [None]
+            # will be completely unused, but for compatibility with collate_pool
+            gs_fea, gp_fea, gd_fea = [torch.zeros(0)], [torch.zeros(0)], [torch.zeros(0)]
 
         # TODO need to test that pair_type created as expected
         nbr_fea_idx, nbr_dist = np.array(nbr_fea_idx), np.array(nbr_dist)
