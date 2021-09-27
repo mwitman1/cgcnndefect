@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from .data import CIFData
 from .data import collate_pool
 from .model import CrystalGraphConvNet
+from .model_sph_harmonics import SpookyModel, SpookyModelVectorized
 from .util import save_checkpoint, AverageMeter, class_eval, mae, Normalizer
 
 parser = argparse.ArgumentParser(description='Crystal gated neural networks')
@@ -92,16 +93,36 @@ def main():
         global_fea_len = 0
     print("Potential applicable to: ", dataset.all_elems)
 
-    model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
-                                atom_fea_len=model_args.atom_fea_len,
-                                n_conv=model_args.n_conv,
-                                h_fea_len=model_args.h_fea_len,
-                                n_h=model_args.n_h,
-                                classification=True if model_args.task ==
-                                'classification' else False,
-                                Fxyz=True if model_args.task == 'Fxyz' else False,
-                                all_elems=model_args.all_elems,
-                                global_fea_len=global_fea_len)
+    if model_args.model_type == 'cgcnn':
+        model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,
+                                    atom_fea_len=model_args.atom_fea_len,
+                                    n_conv=model_args.n_conv,
+                                    h_fea_len=model_args.h_fea_len,
+                                    n_h=model_args.n_h,
+                                    classification=True if model_args.task ==
+                                    'classification' else False,
+                                    Fxyz=True if model_args.task == 'Fxyz' else False, #MW
+                                    all_elems=model_args.all_elems, #MW
+                                    global_fea_len=global_fea_len) #MW
+    elif model_args.model_type == 'spooky':
+        if model_args.njmax > 0:
+            model = SpookyModelVectorized(orig_atom_fea_len,
+                                          atom_fea_len = model_args.atom_fea_len,
+                                          n_conv = model_args.n_conv,
+                                          h_fea_len = model_args.h_fea_len,
+                                          n_h = model_args.n_h,
+                                          global_fea_len = global_fea_len,
+                                          njmax = model_args.njmax) #MW 
+        else:
+            # TODO: to be discontinued once final testing done
+            raise ValueError('Only use vectorized model, specified by njmax > 0!')
+            model = SpookyModel(orig_atom_fea_len,
+                                atom_fea_len = args.atom_fea_len,
+                                n_conv = args.n_conv,
+                                h_fea_len = args.h_fea_len,
+                                n_h = args.n_h,
+                                global_fea_len = global_fea_len) #MW 
+
     if args.cuda:
         model.cuda()
 
@@ -175,15 +196,25 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                              input[2].cuda(non_blocking=True),
                              [crys_idx.cuda(non_blocking=True) for crys_idx in input[3]])
             else:
-                input_var = (Variable(input[0]),
-                             Variable(input[1]),
-                             input[2],
-                             input[3],
-                             input[4],
-                             input[5],
-                             input[6],
-                             input[7],
-                             input[8])
+                if model_args.model_type == 'cgcnn':
+                    input_var = (Variable(input[0]), # batch_atom_fea
+                                 Variable(input[1]), # batch_nbr_fea
+                                 input[2],           # batch_nbr_fea_idx
+                                 input[3],           # crystal_atom_idx
+                                 input[4],           # MW: batch_atom_type 
+                                 input[5],           # MW: batch_nbr_type
+                                 input[6],           # MW: batch_nbr_dist
+                                 input[7],           # MW: batch_pair_type
+                                 input[8])           # MW: batch_global_fea
+                elif model_args.model_type == 'spooky':
+                    input_var = (Variable(input[0]), # batch_atom_fea
+                                 input[9],           # batch_nbr_fea_idx_all
+                                 input[3],           # crystal_atom_idx
+                                 input[10],          # batch_gs_fea
+                                 input[11],          # batch_gp_fea
+                                 input[12],          # batch_gd_fea
+                             input[8])           # batch_global_fea
+
                 if model_args.all_elems != [0]:
                     crys_rep_ener = model.compute_repulsive_ener(input[3],
                                                                  input[4],

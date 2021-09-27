@@ -54,7 +54,7 @@ def get_train_val_test_loader(dataset, collate_fn=default_collate,
     """
     print('num_workers ', num_workers)
     #torch.set_num_threads(1)
-    torch.multiprocessing.set_sharing_strategy('file_system')
+    #torch.multiprocessing.set_sharing_strategy('file_system')
     total_size = len(dataset)
     if train_ratio is None:
         assert val_ratio + test_ratio < 1
