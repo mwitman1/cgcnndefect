@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
-from pymatgen.core.structure import Structure
+from ase.io import read,write
+from pymatgen.core.structure import Structure, Molecule
+from pymatgen.io.ase import AseAtomsAdaptor
 from scipy.special import sph_harm
 from math import comb
 from pprint import pprint
@@ -38,7 +40,7 @@ def fcut(r, rcut):
     
     return fcutr
 
-def compute_rhok(r, k, K, rcut, gamma=0.5):
+def compute_rhok(r, k, K, rcut, gamma=0.9):
 
     rhok = comb(K-1,k)*np.exp(-gamma*r)**k*(1-np.exp(-gamma*r))**(K-1-k)*\
            fcut(r,rcut) 
@@ -71,6 +73,7 @@ def get_harmonics_fea(structure, all_nbrs, K, rcut, njmax=0):
         # exit if more neighbors exist in the cutoff than 
         if len(nbrs) >= njmax and njmax != 0:
             raise ValueError("Warning! You're max num of possible neighbors is not sufficient to capture all neighbors within the requested cutoff!")
+            #print("Warning! More neighs in cutoff than njmax")
 
         # variable number of neighbors w/in site for each site
         #nbr_fea_idx.append([nbr[2] for nbr in nbrs])
@@ -179,6 +182,7 @@ class Residual(nn.Module):
         super(Residual, self).__init__()
         self.linear1 = nn.Linear(fea_len_in,fea_len_out)
         self.silu1 = nn.SiLU()
+        #self.bn1 = nn.BatchNorm1d(fea_len_out)
 
     def forward(self,x):
         return x + self.linear1(self.silu1(x))
@@ -186,12 +190,13 @@ class Residual(nn.Module):
 class ResMLP(nn.Module):
     def __init__(self,fea_len_in, fea_len_out):
         super(ResMLP, self).__init__()
-        self.linear1 = nn.Linear(fea_len_in,fea_len_out)
-        self.silu1 = nn.SiLU()
         self.residual = Residual(fea_len_in,fea_len_in)
+        self.silu1 = nn.SiLU()
+        self.linear1 = nn.Linear(fea_len_in,fea_len_out)
+        self.bn1 = nn.BatchNorm1d(fea_len_in)
 
     def forward(self,x):
-        return self.linear1(self.silu1(self.residual(x)))
+        return self.linear1(self.silu1(self.residual(self.bn1(x))))
 
 class InvertedLinear(nn.Module):
     def __init__(self,fea_len_in, fea_len_out):
@@ -382,6 +387,8 @@ class SpookyLocalBlockVectorized(nn.Module):
 
         """
 
+        # shape(N, atom_fea_len)
+        final_c = self.resmlp_c(atom_fea)
         # shape (N, F)
         s_fea = self.resmlp_s(atom_fea)
         # shape (N, F)
@@ -435,12 +442,29 @@ class SpookyLocalBlockVectorized(nn.Module):
         #print(nbr_p_fea.shape)
 
         # shape (N, F, 3)  
-        all_p_vectorized = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
+        all_p = torch.sum(nbr_p_fea.unsqueeze(-1).expand(\
                      p_env.shape[0], p_env.shape[1], self.F, 3)*p_env,dim=1)
-        #print(all_p_vectorized.shape)
+        #print(all_p.shape)
 
         # shape (N, 3, F)  
-        all_p = torch.transpose(all_p_vectorized,1,2)
+        #all_p = torch.transpose(all_p,1,2)
+
+        # inner prod of eq(12) dimensionality doesn't seem to work out
+        # < P1 p , P2 p > \in R ?? = Tr( (P2 p)^T \dot (P1 p) )
+        # shape (N, 3, F)
+        #p1term = torch.matmul(all_p, self.P1)
+        # shape (N, 3, F)
+        #p2term = torch.matmul(all_p, self.P2)
+        # shape (N, atom_fea_len) via broadcasting in dim1
+        #final_p =\
+        #    torch.sum(\
+        #     torch.diagonal(\
+        #            torch.matmul(torch.transpose(p2term,1,2),p1term), 
+        #            dim1=-2, dim2=-1),
+        #    dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
+
+        # shape (N, F)
+        final_p = torch.sum(torch.matmul(self.P1,all_p)*torch.matmul(self.P2,all_p),dim=2)
 
 
         # shape (N, nj, F, 5)
@@ -459,42 +483,28 @@ class SpookyLocalBlockVectorized(nn.Module):
                 len(gd), self.njmax, self.F)
 
         # shape (N, F, 5) 
-        all_d_vectorized = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
+        all_d = torch.sum(nbr_d_fea.unsqueeze(-1).expand(\
                      d_env.shape[0], d_env.shape[1], self.F, 5)*d_env,dim=1)
 
         # shape (N, 5, F) 
-        all_d = torch.transpose(all_d_vectorized,1,2)
-
-        # inner prod of eq(12) dimensionality doesn't seem to work out
-        # < P1 p , P2 p > \in R ?? = Tr( (P2 p)^T \dot (P1 p) )
-        # shape (N, 3, atom_fea_len)
-        p1term = torch.matmul(all_p, self.P1)
-        # shape (N, 3, atom_fea_len)
-        p2term = torch.matmul(all_p, self.P2)
-        # shape (N, atom_fea_len) via broadcasting in dim1
-        final_p =\
-            torch.sum(\
-             torch.diagonal(\
-                    torch.matmul(torch.transpose(p2term,1,2),p1term), 
-                    dim1=-2, dim2=-1),
-            dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
-
+        #all_d = torch.transpose(all_d,1,2)
 
         # same issue for < D1 d, D2 d >
         # shape (N, 5, atom_fea_len)
-        d1term = torch.matmul(all_d, self.D1)
+        #d1term = torch.matmul(all_d, self.D1)
         # shape (N, 5, atom_fea_len)
-        d2term = torch.matmul(all_d, self.D2)
+        #d2term = torch.matmul(all_d, self.D2)
         # shape (N, atom_fea_len) via broadcasting in dim1
-        final_d =\
-            torch.sum(
-             torch.diagonal(
-                torch.matmul(torch.transpose(d2term,1,2),d1term),
-                dim1=-2, dim2=-1),
-            dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
+        #final_d =\
+        #    torch.sum(
+        #     torch.diagonal(
+        #        torch.matmul(torch.transpose(d2term,1,2),d1term),
+        #        dim1=-2, dim2=-1),
+        #    dim=1).unsqueeze(-1).expand(atom_fea.shape[0], self.atom_fea_len)
 
-        # shape(N, atom_fea_len)
-        final_c = self.resmlp_c(atom_fea)
+        # shape (N, F)
+        final_d = torch.sum(torch.matmul(self.D1,all_d)*torch.matmul(self.D2,all_d),dim=2)
+
 
         #print(final_c)
         #print(final_s)
@@ -707,11 +717,14 @@ def debug_featurization_single(crystal, cutoff, atom_fea_len,
     dummy_init_atom_fea = torch.Tensor(\
         [[crystal[i].specie.number for _ in range(atom_fea_len)]\
          for i in range(len(crystal))])
+    print(dummy_init_atom_fea)
 
     # dummy atom features input to model (i.e. embedding layer)
     dummy_orig_atom_fea = torch.zeros((len(crystal),orig_atom_fea_len))
     for i in range(len(crystal)):
-        dummy_orig_atom_fea[i,crystal[i].specie.number] = 1
+        #dummy_orig_atom_fea[i,crystal[i].specie.number] = 1
+        dummy_orig_atom_fea[i,:] = crystal[i].specie.number
+    print(dummy_orig_atom_fea)
 
     # indices of all neighbors    
     if njmax > 0:
@@ -801,7 +814,8 @@ def debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
         # dummy atom features input to model (i.e. embedding layer)
         orig_atom_fea = torch.zeros((len(crystal),orig_atom_fea_len))
         for j in range(len(crystal)):
-            orig_atom_fea[j,crystal[j].specie.number] = 1
+            #orig_atom_fea[j,crystal[j].specie.number] = 1
+            orig_atom_fea[j,:] = crystal[j].specie.number
         batch_orig_atom_fea.append(orig_atom_fea)
  
         # some dummy atom feature vectors mapped to the input size of the conv layer 
@@ -876,6 +890,9 @@ def debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
 
     return batch_gs_fea, batch_gp_fea, batch_gd_fea, out_model
 
+    
+
+
 if __name__ == "__main__":
 
     ########################################################################
@@ -889,13 +906,40 @@ if __name__ == "__main__":
     orig_atom_fea_len = 92
     seed = 0
 
+
     ########################################################################
     # Some crystal structures, uc and supercell representation 
     ########################################################################
     ciffile = sys.argv[1]
-    crystal = Structure.from_file(ciffile)
+    structure = read(ciffile)
+    crystal = Structure(structure.get_cell(),
+                        structure.get_chemical_symbols(),
+                        structure.get_positions(),
+                        coords_are_cartesian=True) #Structure.from_file(ciffile)
     supercrystal = crystal *(5,5,5)
 
+
+    # a dummy cubic crystal for testing rotations around origin
+    cell = np.eye(3)*10
+    symbs = ['C', 'O', 'N', 'S', 'H']
+    positions1 = np.array(\
+        [[ 0.0,  0.0,  0.0],  
+        [ 1.0,  0.5,  1.7],
+        [-2.1, -0.7,  1.2],
+        [ 0.9, -1.4, -0.9],
+        [-0.8,  1.2, -1.2]])
+    #positions2
+    #rotcrystal1 
+
+    ########################################################################
+    # Confirm rotation invariance of features
+    ########################################################################
+    # TODO
+
+
+    ########################################################################
+    # Confirm unit cell vs. supercell produces same prediction 
+    ########################################################################
     print('\nDebug single supercell featurization:')
     gs_superuc, gp_superuc, gd_superuc, out_conv_superuc, out_model_superuc =\
         debug_featurization_single(supercrystal, cutoff, atom_fea_len, 
@@ -905,6 +949,7 @@ if __name__ == "__main__":
     gs_uc, gp_uc, gd_uc, out_conv_uc, out_model_uc =\
         debug_featurization_single(crystal, cutoff, atom_fea_len, 
                                    K, njmax, orig_atom_fea_len, seed)
+    
     
     # This actually won't help b/c the nbr order becomes different
     # based on the size of the uc representation
@@ -925,7 +970,7 @@ if __name__ == "__main__":
 
 
     print('\nDebug batch uc featurization:')
-    crystal_batch = [crystal, supercrystal]*10
+    crystal_batch = [crystal, supercrystal]*2
     _, _, _, out_model = debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
                                                    K, njmax, orig_atom_fea_len, seed)
     print(out_model)
@@ -948,72 +993,5 @@ if __name__ == "__main__":
     _, _, _, out_model = debug_featurization_batch(crystal_batch, cutoff, atom_fea_len,
                                                    K, njmax, orig_atom_fea_len, seed)
     print(out_model)
-
-
-
-
-    #optimizer = torch.optim.Adam(model.parameters(), 0.05)
-    #optimizer.zero_grad()
-    #criterion = nn.MSELoss()
-
-    #t4 = time.time()
-    #loss = criterion(out[0],target)
-    #loss.backward()
-    #optimizer.step()
-    #t4e = time.time()
-    #print('Model backward (2 crystals): ', t4e-t4)
-
-    #num_params=sum(p.numel() for p in model.parameters() if p.requires_grad)
-    #print("# trainable params: %d"%num_params)
-
-    #print(sys.getsizeof(batch_gs_fea),
-    #      sys.getsizeof(batch_gp_fea),
-    #      sys.getsizeof(batch_gd_fea),
-    #      sys.getsizeof(batch_atom_fea))
-
-
-    #print("debugging neighbor padding")
-    #testF = 5
-    #testnj = 7
-    #testnjmax = 10
-    #testK = 4
-    #np.random.seed(0)
-    #testgp = [i+torch.tensor(np.random.rand(testK, 3))\
-    #          for i in range(testnj)]
-    #testgp_padded = testgp + [torch.tensor(np.zeros((testK, 3)))\
-    #                          for i in range(testnjmax - testnj)]
-    #testgp = torch.stack(testgp)
-    #testgp_padded = torch.stack(testgp_padded)
-    #testGp = torch.tensor(np.random.rand(testF, testK))
-
-    #res = torch.matmul(testGp, testgp[0])
-
-    #print(testGp, testgp)
-    #print(testGp.shape, testgp.shape)
-    #print(res)
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

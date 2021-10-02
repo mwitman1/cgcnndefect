@@ -14,7 +14,7 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn import metrics
 from torch.autograd import Variable
-from torch.optim.lr_scheduler import MultiStepLR
+from torch.optim.lr_scheduler import MultiStepLR, CyclicLR
 
 from .data import CIFData, CIFDataFeaturizer
 from .data import collate_pool, get_train_val_test_loader
@@ -87,6 +87,8 @@ parser.add_argument('--n-conv', default=3, type=int, metavar='N',
                     help='number of conv layers')
 parser.add_argument('--n-h', default=1, type=int, metavar='N',
                     help='number of hidden layers after pooling')
+parser.add_argument("--seed", default=0,type=int,
+                    help='pytorch seed')
 
 
 # New CL options added by MW
@@ -127,6 +129,7 @@ else:
 
 def main():
     global args, best_mae_error
+    torch.manual_seed(args.seed)
 
     # load data
     print(args.task)
@@ -257,6 +260,11 @@ def main():
 
     scheduler = MultiStepLR(optimizer, milestones=args.lr_milestones,
                             gamma=0.1)
+    #scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, 
+    #                                              base_lr=args.lr, 
+    #                                              max_lr=args.lr*5,
+    #                                              step_size_up=200,
+    #                                              cycle_momentum=False)
 
     # Pickle the CIFData object so the exact same settings
     # can be used in predict mode

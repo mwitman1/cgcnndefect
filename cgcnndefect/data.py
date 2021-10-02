@@ -11,6 +11,7 @@ import itertools
 import numpy as np
 import torch
 from pymatgen.core.structure import Structure
+from ase.io import read as ase_read
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.dataloader import default_collate
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -414,7 +415,7 @@ class CIFData(Dataset):
     """
     def __init__(self, root_dir, Fxyz=False, all_elems=[0],
                  max_num_nbr=12, 
-                 radius=5, 
+                 radius=4.5, 
                  dmin=0, 
                  step=0.2,
                  random_seed=123,
@@ -522,8 +523,15 @@ class CIFData(Dataset):
         #print("Loading %d:"%idx, cif_id)
 
         # Base structure information
-        crystal = Structure.from_file(os.path.join(self.root_dir,
-                                                   cif_id+'.cif'))
+        #crystal = Structure.from_file(os.path.join(self.root_dir,
+        #                                           cif_id+'.cif'))
+        # An annoying additional step required for preserving the atomic 
+        # ordering between the cif file and the Structure object
+        structure = ase_read(os.path.join(self.root_dir,cif_id+'.cif'))
+        crystal = Structure(structure.get_cell(),
+                            structure.get_chemical_symbols(),
+                            structure.get_positions(),
+                            coords_are_cartesian=True)
 
         all_atom_types = [ELEM_DICT[crystal[i].specie.symbol]\
                           for i in range(len(crystal))]
