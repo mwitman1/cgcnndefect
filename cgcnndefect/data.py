@@ -424,7 +424,8 @@ class CIFData(Dataset):
                  csv_ext = '',
                  model_type='cgcnn',
                  K = 4,
-                 njmax=75):
+                 njmax=75,
+                 init_embed_file='atom_init.json'):
         self.root_dir = root_dir
         self.Fxyz = Fxyz
         self.all_elems = all_elems
@@ -442,6 +443,7 @@ class CIFData(Dataset):
             self.compute_sph_harm = False
         self.K = K
         self.njmax = njmax # max neighs for sph_harm #TODO handle non-padding scenario of njmax=0
+        self.init_embed_file = init_embed_file
 
         self.reload_data()
 
@@ -449,7 +451,7 @@ class CIFData(Dataset):
     
         assert os.path.exists(self.root_dir), 'root_dir does not exist!'
         id_prop_file = os.path.join(self.root_dir, 'id_prop.csv'+self.csv_ext)
-        assert os.path.exists(id_prop_file), 'id_prop.csv does not exist!'
+        assert os.path.exists(id_prop_file), 'id_prop.csv%s does not exist!'%self.csv_ext
 
         with open(id_prop_file) as f:
             reader = csv.reader(f)
@@ -457,8 +459,8 @@ class CIFData(Dataset):
 
         random.seed(self.random_seed)
         random.shuffle(self.id_prop_data)
-        atom_init_file = os.path.join(self.root_dir, 'atom_init.json')
-        assert os.path.exists(atom_init_file), 'atom_init.json does not exist!'
+        atom_init_file = os.path.join(self.root_dir, self.init_embed_file)
+        assert os.path.exists(atom_init_file), 'initial atom emebdding file (atom_init.json) does not exist!'
         self.ari = AtomCustomJSONInitializer(atom_init_file)
         #self.gdf = GaussianDistance(dmin=dmin, dmax=self.radius, step=step)
         self.gdf = G2Descriptor(Rc=self.radius,large=True)
