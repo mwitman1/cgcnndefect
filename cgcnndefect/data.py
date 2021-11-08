@@ -519,7 +519,9 @@ class CIFData(Dataset):
         if self.Fxyz:
             cif_id, target, target_Fxyz = self.id_prop_data[idx]
         else:
-            cif_id, target = self.id_prop_data[idx]
+            cif_id = self.id_prop_data[idx][0]
+            target = np.array(self.id_prop_data[idx][1:],dtype=float)
+            #print(cif_id, target)
         #print("Loading %d:"%idx, cif_id)
 
         # Base structure information
@@ -610,7 +612,8 @@ class CIFData(Dataset):
 
 
         # return format for DataLoader
-        target = torch.Tensor([float(target)])
+        #target = torch.Tensor([float(target)])
+        target = torch.Tensor(target)
         if self.Fxyz:
             # TODO delete this option
             target_Fxyz = torch.Tensor(target_Fxyz)

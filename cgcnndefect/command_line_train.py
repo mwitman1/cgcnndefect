@@ -87,6 +87,8 @@ parser.add_argument('--n-conv', default=3, type=int, metavar='N',
                     help='number of conv layers')
 parser.add_argument('--n-h', default=1, type=int, metavar='N',
                     help='number of hidden layers after pooling')
+parser.add_argument('--o-fea-len', default=1, type=int, metavar='N',
+                    help='number of nodes in final output layer')
 parser.add_argument("--seed", default=0,type=int,
                     help='pytorch seed')
 
@@ -174,6 +176,7 @@ def main():
         _, sample_target, sample_target_Fxyz, _ =\
             collate_pool(sample_data_list)
         normalizer = Normalizer(sample_target)
+        #print(normalizer.norm(torch.max(sample_target[0]),torch.max(sample_target[1])))
         if args.task == 'Fxyz':
             raise NotImplemented("Forces not implemented yet")
             normalizer_Fxyz = Normalizer(sample_target_Fxyz)
@@ -200,7 +203,8 @@ def main():
                                                            'classification' else False,
                                     Fxyz=True if args.task == 'Fxyz' else False, #MW
                                     all_elems=args.all_elems, #MW
-                                    global_fea_len=global_fea_len) #MW
+                                    global_fea_len=global_fea_len,
+                                    o_fea_len=args.o_fea_len) #MW
     elif args.model_type == 'spooky':
         if args.njmax > 0:
             model = SpookyModelVectorized(orig_atom_fea_len,
@@ -617,8 +621,15 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                 #test_pred = normalizer.denorm(output.data.cpu()) #<-Fxyz mod
                 test_pred = normalizer.denorm(output[0].data.cpu())+crys_rep_ener
                 test_target = target
-                test_preds += test_pred.view(-1).tolist()
-                test_targets += test_target.view(-1).tolist()
+                if output[0].shape[1]> 1:
+                    test_preds += test_pred.tolist()
+                else:
+                    test_preds += test_pred.view(-1).tolist()
+                #test_preds += test_pred.view(-1).tolist()
+                if output[0].shape[1] > 1:
+                    test_targets += test_target.tolist()
+                else:
+                    test_targets += test_target.view(-1).tolist()
                 test_cif_ids += batch_cif_ids
 
         elif args.task == 'Fxyz':
@@ -705,7 +716,11 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
             writer = csv.writer(f)
             for cif_id, target, pred in zip(test_cif_ids, test_targets,
                                             test_preds):
-                writer.writerow((cif_id, target, pred))
+                print(target,pred)
+                if isinstance(target,list):
+                    writer.writerow((cif_id, *target, *pred))
+                else:
+                    writer.writerow((cif_id, target, pred))
         if args.task == 'Fxyz':
             with open(os.path.join(args.resultdir,'test_results_Fxyz.csv'), 'w') as f:
                 for cif_id, target_Fxyz, pred_Fxyz in zip(test_cif_ids, 

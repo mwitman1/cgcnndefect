@@ -98,7 +98,7 @@ class CrystalGraphConvNet(nn.Module):
     def __init__(self, orig_atom_fea_len, nbr_fea_len,
                  atom_fea_len=64, n_conv=3, h_fea_len=128, n_h=1,
                  classification=False, Fxyz=False, all_elems=[0],
-                 global_fea_len=0):
+                 global_fea_len=0, o_fea_len=1):
         """
         Initialize CrystalGraphConvNet.
 
@@ -143,7 +143,7 @@ class CrystalGraphConvNet(nn.Module):
         if self.classification:
             self.fc_out = nn.Linear(h_fea_len, 2)
         else:
-            self.fc_out = nn.Linear(h_fea_len, 1)
+            self.fc_out = nn.Linear(h_fea_len, o_fea_len)
         if self.classification:
             self.logsoftmax = nn.LogSoftmax(dim=1)
             self.dropout = nn.Dropout()
