@@ -114,6 +114,8 @@ parser.add_argument('--model-type', default='cgcnn', type=str,
                     choices=['cgcnn','spooky'])
 parser.add_argument('--njmax', default=75, type=int, 
                     help='Max num nbrs for sph harm featurization')
+parser.add_argument('--init-embed-file',default='atom_init.json', type=str,
+                    help='file for the initial atom embeddings (based only on elemental identity)')
 
 
 args = parser.parse_args(sys.argv[1:])
@@ -136,6 +138,7 @@ def main():
     # load data
     print(args.task)
     #torch.multiprocessing.set_sharing_strategy('file_system')
+    print(args.task=='Fxyz')
     dataset = CIFData(*args.data_options,
                       args.task=='Fxyz',            # MW: to remove
                       args.all_elems,               # MW: needed for computing ZBL
@@ -143,7 +146,8 @@ def main():
                       atom_spec = args.atom_spec,   # MW: if local/atom features available
                       csv_ext = args.csv_ext,       # MW: if using a specific id_prop.csv.*
                       model_type = args.model_type, # MW: if using non-CGCNN model
-                      njmax = args.njmax)           # MW: max nbrs for sph_harm
+                      njmax = args.njmax,           # MW: max nbrs for sph_harm
+                      init_embed_file = args.init_embed_file) # MW: choosing specific file for initial atom embed
     collate_fn = collate_pool
     train_loader, val_loader, test_loader = get_train_val_test_loader(
         dataset=dataset,
