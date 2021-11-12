@@ -35,7 +35,7 @@ plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Helvetica"]})
 
-def plot(files, labels=None):
+def plot(files, labels=None, predtype=('E','eV')):
 
     datalist = [pd.read_csv(f,names=['struct','actual','predicted']) for f in files]
 
@@ -44,8 +44,6 @@ def plot(files, labels=None):
     fig, ax = plt.subplots(nrows=1,ncols=2,figsize=(4,1.6),constrained_layout=True)
 
     print(datalist)
-
-
 
     xdata = []
     ydata = []
@@ -96,8 +94,8 @@ def plot(files, labels=None):
     print('max', max_act_energy)
     ax[0].plot([min_act_energy,max_act_energy],[min_act_energy,max_act_energy],c='black') 
 
-    ax[0].set_xlabel(r'$E_{\mathrm{DFT}}$ [eV]')
-    ax[0].set_ylabel(r'$E_{\mathrm{CGCNN}}$ [eV]')
+    ax[0].set_xlabel(r'$%s_{\mathrm{DFT}}$ [%s]'%(predtype[0],predtype[1]))
+    ax[0].set_ylabel(r'$%s_{\mathrm{Model}}$ [%s]'%(predtype[0],predtype[1]))
 
 
 
@@ -125,7 +123,7 @@ def plot(files, labels=None):
 
     #ax[1].set_yscale('log')
     ax[1].set_ylabel(r'frequency')
-    ax[1].set_xlabel(r'error [eV]')
+    ax[1].set_xlabel(r'error [%s]'%predtype[1])
     #ax[1].set_xlim((-2,2))
 
     print(np.mean(np.abs(np.array(df_O['actual'],dtype=float)-\
@@ -166,8 +164,8 @@ def plot(files, labels=None):
     #))
     fig3.update_layout(
          #title=r'Defect-CGCNN vs. DFT predictions of $\Delta H_{f,d}$',
-         xaxis_title = 'DFT [eV]',
-         yaxis_title = 'Defect-CGCNN [eV]')
+         xaxis_title = r'$%s_{\mathrm{DFT}}$ [%s]'%(predtype[0],predtype[1]),
+         yaxis_title = r'$%s_{\mathrm{Model}}$ [%s]'%(predtype[0],predtype[1]))
 
     fig3.show()
 
@@ -177,6 +175,8 @@ if __name__ == "__main__":
 
     parser.add_argument('-files', nargs='*', help='list of all parity plot data files')
     parser.add_argument('-labels', nargs='*', help='label for each plot')
+    parser.add_argument('-predtype', nargs=2, default=['E','eV'],
+                        help='label for each plot')
 
     args = parser.parse_args()
 
