@@ -1,3 +1,41 @@
+# Personal and defect modifications
+
+Various personal modifications have been made to make some tasks easier: cross-validation, running on cluster, etc.
+
+### Installable package
+To install as a package use
+```bash
+pip install -e .
+```
+which allows you to then execute training or prediction tasks from anywhere using the command line:
+```bash
+cgcnn-defect-train $flags
+cgcnn-predict-train $flags
+```
+
+### Various CL args
+Can control file targets via CL args to facilitate high-throughput execution across different encoding strategies, cross-validation, etc.
+- To change elemenent encoding file
+```bash
+--init-embed-file $your_atom_init.json
+```
+- To change the default id_prop.csv file of (structure,property) data to id_prop.csv.your_csv_ext:
+```bash
+--csv-ext .your_csv_ext
+```
+
+### Defect modifications
+- Pooling function has been hard coded modified to only extract the feature vector of the node at index i=0 (the atom to be defected)
+- For a given structure1.cif, can introduce local node attributes (e.g. oxidation state) contained in structure1.cif.locals at the graph encoding stage via:
+```bash
+--atom-spec locals
+``` 
+- For a given structure1.cif, can introduce global features (e.g. compound formation enthalpy) contained in structure1.cif.globals at the graph encoding stage via:
+```bash
+--atom-spec globals
+``` 
+- EXPERIMENTAL: can use a local convolution block based on spherical harmonics (at the cost of higher model complexity)
+
 # Crystal Graph Convolutional Neural Networks
 
 This software package implements the Crystal Graph Convolutional Neural Networks (CGCNN) that takes an arbitary crystal structure to predict material properties. 
