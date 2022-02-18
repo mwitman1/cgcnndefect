@@ -71,11 +71,12 @@ def main():
     if args.CIFdatapath is not None:
         with open(args.CIFdatapath,'rb') as f:
             dataset = pickle.load(f)
+            dataset.csv_ext = args.csv_ext
             dataset.reset_root(args.cifpath)
     else:
         dataset = CIFData(args.cifpath)
-    dataset.csv_ext = args.csv_ext
-    dataset.reload_data()
+    #dataset.csv_ext = args.csv_ext
+    #dataset.reload_data()
     
 
     collate_fn = collate_pool
