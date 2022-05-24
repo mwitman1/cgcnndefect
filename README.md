@@ -1,6 +1,6 @@
-# Personal and defect modifications
+# Personal and defect modifications to CGCNN
 
-Various personal modifications have been made to make some tasks easier: cross-validation, running on cluster, etc.
+Modifications for predicting defects and other various personal modifications have been made to make some tasks easier: cross-validation, running on cluster, etc.
 
 ### Installable package
 To install as a package use
@@ -10,11 +10,11 @@ pip install -e .
 which allows you to then execute training or prediction tasks from anywhere using the command line:
 ```bash
 cgcnn-defect-train $flags
-cgcnn-predict-train $flags
+cgcnn-defect-predict $flags
 ```
 
 ### Various CL args
-Can control file targets via CL args to facilitate high-throughput execution across different encoding strategies, cross-validation, etc.
+Can control target files via CL args to facilitate high-throughput execution across different encoding strategies, cross-validation, etc.
 - To change elemenent encoding file
 ```bash
 --init-embed-file $your_atom_init.json
@@ -25,16 +25,46 @@ Can control file targets via CL args to facilitate high-throughput execution acr
 ```
 
 ### Defect modifications
-- Pooling function has been hard coded modified to only extract the feature vector of the node at index i=0 (the atom to be defected)
+- Pooling function has been hard coded to only extract the feature vector of the node at index i=0 (the atom to be defected). In progress: this will be made a lot more efficient in the future by specifying the index from the CL and not needing multiple CIF files for all unique defects within a given host structure
 - For a given structure1.cif, can introduce local node attributes (e.g. oxidation state) contained in structure1.cif.locals at the graph encoding stage via:
 ```bash
 --atom-spec locals
 ``` 
 - For a given structure1.cif, can introduce global features (e.g. compound formation enthalpy) contained in structure1.cif.globals at the graph encoding stage via:
 ```bash
---atom-spec globals
+--crys-spec globals
 ``` 
 - EXPERIMENTAL: can use a local convolution block based on spherical harmonics (at the cost of higher model complexity)
+
+### How to cite
+
+Please cite the following work if you want to use CGCNN and defect modifications.
+
+```
+@article{PhysRevLett.120.145301,
+  title = {Crystal Graph Convolutional Neural Networks for an Accurate and Interpretable Prediction of Material Properties},
+  author = {Xie, Tian and Grossman, Jeffrey C.},
+  journal = {Phys. Rev. Lett.},
+  volume = {120},
+  issue = {14},
+  pages = {145301},
+  numpages = {6},
+  year = {2018},
+  month = {Apr},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevLett.120.145301},
+  url = {https://link.aps.org/doi/10.1103/PhysRevLett.120.145301}
+}
+@article{Witman2022,
+  author = {Witman, Matthew D. and Goyal, Anuj and Ogitsu, Tadashi and McDaniel, Anthony H. and Lany, Stephan},
+  doi = {10.26434/chemrxiv-2022-frcns},
+  journal = {ChemRxiv},
+  pages = {10.26434/chemrxiv-2022-frcns},
+  title = {{Graph neural network modeling of vacancy formation enthalpy for materials discovery and its application in solar thermochemical water splitting}},
+  year = {2022},
+  url = {https://chemrxiv.org/engage/chemrxiv/article-details/628bdf9f87d01f60fcefa355}
+}
+```
 
 # Crystal Graph Convolutional Neural Networks
 
