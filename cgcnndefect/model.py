@@ -98,7 +98,7 @@ class CrystalGraphConvNet(nn.Module):
     def __init__(self, orig_atom_fea_len, nbr_fea_len,
                  atom_fea_len=64, n_conv=3, h_fea_len=128, n_h=1,
                  classification=False, Fxyz=False, all_elems=[0],
-                 global_fea_len=0, o_fea_len=1):
+                 global_fea_len=0, o_fea_len=1, pooltype='all'):
         """
         Initialize CrystalGraphConvNet.
 
@@ -117,6 +117,9 @@ class CrystalGraphConvNet(nn.Module):
           Number of hidden features after pooling
         n_h: int
           Number of hidden layers after pooling
+
+        pooltype: str
+          Flag that species the pooling type {all, 0}
         
 
         Fxyz : bool
@@ -135,6 +138,8 @@ class CrystalGraphConvNet(nn.Module):
                                     for _ in range(n_conv)])
         self.conv_to_fc = nn.Linear(atom_fea_len+global_fea_len, h_fea_len)
         self.conv_to_fc_softplus = nn.Softplus()
+        self.pooltype = pooltype
+
         if n_h > 1:
             self.fcs = nn.ModuleList([nn.Linear(h_fea_len, h_fea_len)
                                       for _ in range(n_h-1)])
@@ -221,7 +226,7 @@ class CrystalGraphConvNet(nn.Module):
             #crys_Fxyz_out = self.fc_F_out(self.conv_to_fc_softplus(
             #                                                   crys_Fxyz_out))
         #print(crys_Fxyz_out.shape, "<- forces return shape")
-        crys_fea = self.pooling(atom_fea, crystal_atom_idx)
+        crys_fea = self.pooling(atom_fea, crystal_atom_idx, self.pooltype)
         #print(crys_fea.shape, " <- crys_fea post pooling")
         # >>> torch.Size([N0, atom_fea_len])
 
@@ -363,7 +368,8 @@ class CrystalGraphConvNet(nn.Module):
 
     @torch.jit.export
     def pooling(self, atom_fea : torch.Tensor, 
-                      crystal_atom_idx : List[torch.Tensor]):
+                      crystal_atom_idx : List[torch.Tensor],
+                      pooltype : str):
         """
         Pooling the atom features to crystal features
 
@@ -383,16 +389,22 @@ class CrystalGraphConvNet(nn.Module):
         #assert torch.sum(torch.tensor([len(idx_map) for idx_map in\
         #    crystal_atom_idx])) == atom_fea.data.shape[0]
 
-        # 1. normal pooling
-        summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
-                      for idx_map in crystal_atom_idx]
 
-        # 2. for defect, we are really only interested with the feature
-        # vector of the node that would become the defect
-        #print([idx_map[0] for idx_map in crystal_atom_idx])
-        #summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
-        #              for idx_map in crystal_atom_idx]
-        #print(summed_fea)
+        # 1. normal pooling
+        if pooltype == 'all':
+            summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
+                          for idx_map in crystal_atom_idx]
+        elif pooltype == '0':
+            # 2. for defect, we are really only interested with the feature
+            # vector of the node that would become the defect
+            #print([idx_map[0] for idx_map in crystal_atom_idx])
+            summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
+                          for idx_map in crystal_atom_idx]
+            #print(summed_fea)
+        elif pooltype == 'none':
+            return atom_fea
+        else:
+            raise ValueError("unallowed pooltype. must be in {'all','0'}")
 
         # 3. not sure what this was
         #summed_fea = [atom_fea[idx_map[0]] for idx_map in crystal_atom_idx]

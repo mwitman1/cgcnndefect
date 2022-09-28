@@ -50,6 +50,7 @@ def plot(files, labels=None, predtype=('E','eV')):
     colors = []
     structs = []
     batch = []
+    ns = []
     
     for i, df in enumerate(datalist):
         xdata += list(df['actual'])
@@ -57,6 +58,7 @@ def plot(files, labels=None, predtype=('E','eV')):
         colors += [DEFCOLS[i] for _ in range(len(df['actual']))]
         structs += list(df['struct'])
         batch += [i for _ in range(len(df['actual']))]
+        ns += [struct.split('-')[2][1:] for struct in list(df['struct'])]
 
     xdata = np.array(xdata,dtype=float)
     ydata = np.array(ydata,dtype=float)
@@ -64,6 +66,7 @@ def plot(files, labels=None, predtype=('E','eV')):
 
     df_all = pd.DataFrame()
     df_all['struct'] = structs
+    df_all['ns'] = ns
     df_all['actual'] = xdata
     df_all['predicted'] = ydata
     df_all['batch'] = batch
@@ -144,7 +147,7 @@ def plot(files, labels=None, predtype=('E','eV')):
   
     # https://plotly.com/python/line-and-scatter/ 
     # https://stackoverflow.com/questions/65124833/plotly-how-to-combine-scatter-and-line-plots-using-plotly-express
-    fig1 = px.scatter(df_all, x="actual", y="predicted", hover_data=['struct'],color='batch')
+    fig1 = px.scatter(df_all, x="actual", y="predicted", hover_data=['struct'],color='ns')
     fig2 = px.line(df_yeqx, x='x', y='y')
     fig3 = go.Figure(data=fig1.data + fig2.data)
 
@@ -164,8 +167,8 @@ def plot(files, labels=None, predtype=('E','eV')):
     #))
     fig3.update_layout(
          #title=r'Defect-CGCNN vs. DFT predictions of $\Delta H_{f,d}$',
-         xaxis_title = r'$%s_{\mathrm{DFT}}$ [%s]'%(predtype[0],predtype[1]),
-         yaxis_title = r'$%s_{\mathrm{Model}}$ [%s]'%(predtype[0],predtype[1]))
+         xaxis_title = r'%s (DFT) [%s]'%(predtype[0],predtype[1]),
+         yaxis_title = r'%s (Model) [%s]'%(predtype[0],predtype[1]))
 
     fig3.show()
 

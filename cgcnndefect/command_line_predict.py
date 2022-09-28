@@ -71,11 +71,12 @@ def main():
     if args.CIFdatapath is not None:
         with open(args.CIFdatapath,'rb') as f:
             dataset = pickle.load(f)
+            dataset.csv_ext = args.csv_ext
             dataset.reset_root(args.cifpath)
     else:
         dataset = CIFData(args.cifpath)
-    dataset.csv_ext = args.csv_ext
-    dataset.reload_data()
+    #dataset.csv_ext = args.csv_ext
+    #dataset.reload_data()
     
 
     collate_fn = collate_pool
@@ -103,7 +104,9 @@ def main():
                                     'classification' else False,
                                     Fxyz=True if model_args.task == 'Fxyz' else False, #MW
                                     all_elems=model_args.all_elems, #MW
-                                    global_fea_len=global_fea_len) #MW
+                                    global_fea_len=global_fea_len, #MW
+                                    o_fea_len=model_args.o_fea_len, # MW
+                                    pooltype=model_args.pooltype) #MW
     elif model_args.model_type == 'spooky':
         if model_args.njmax > 0:
             model = SpookyModelVectorized(orig_atom_fea_len,

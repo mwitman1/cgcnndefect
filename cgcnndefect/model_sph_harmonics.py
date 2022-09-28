@@ -566,10 +566,12 @@ class SpookyConvVectorized(nn.Module):
 class SpookyModel(nn.Module):
 
     def __init__(self, orig_atom_fea_len, atom_fea_len=64, n_conv=3, 
-                       h_fea_len=128, n_h=1, K=4, all_elems = [0], global_fea_len=0):
+                       h_fea_len=128, n_h=1, K=4, all_elems = [0], global_fea_len=0,
+                       pooltype='all'):
         super(SpookyModel, self).__init__()
 
         self.n_h = n_h
+        self.pooltype = pooltype
 
         self.embedding = nn.Linear(orig_atom_fea_len, atom_fea_len)
        
@@ -600,7 +602,7 @@ class SpookyModel(nn.Module):
             atom_fea = conv_func(atom_fea, nbr_fea_idx, 
                                  gs_fea, gp_fea, gd_fea)
 
-        crys_fea = self.pooling(atom_fea, crystal_atom_idx)
+        crys_fea = self.pooling(atom_fea, crystal_atom_idx, self.pooltype)
 
         crys_fea = self.conv_to_fc(torch.cat([crys_fea, global_fea],dim=1))
 
@@ -613,20 +615,44 @@ class SpookyModel(nn.Module):
         return [out]
 
     def pooling(self, atom_fea : torch.Tensor,
-                      crystal_atom_idx : List[torch.Tensor]):
+                      crystal_atom_idx : List[torch.Tensor],
+                      pooltype : str):
+        """
+        Pooling the atom features to crystal features
 
-        # TODO implement flexibility for pooling type from function arguments
+        N: Total number of atoms in the batch
+        N0: Total number of crystals in the batch
 
-        # If pooling requires a summing/avging/etc over all atoms in crystal
-        #summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
-        #              for idx_map in crystal_atom_idx]
+        Parameters
+        ----------
 
-        # If, instead of pooling, simply want the feature vec of a single atom
-        summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
-                      for idx_map in crystal_atom_idx]
+        atom_fea: Variable(torch.Tensor) shape (N, atom_fea_len)
+          Atom feature vectors of the batch
+        crystal_atom_idx: list of torch.LongTensor of length N0
+          Mapping from the crystal idx to atom idx
+          Must be a list of tensors since each idx_map is 
+            tensor of different size (number of atoms in that crystal)
+        """
+        #assert torch.sum(torch.tensor([len(idx_map) for idx_map in\
+        #    crystal_atom_idx])) == atom_fea.data.shape[0]
 
-        # If we want to pool the feature vecs of only select atoms
-        # etc
+
+        # 1. normal pooling
+        if pooltype == 'all':
+            summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
+                          for idx_map in crystal_atom_idx]
+        elif pooltype == '0':
+            # 2. for defect, we are really only interested with the feature
+            # vector of the node that would become the defect
+            #print([idx_map[0] for idx_map in crystal_atom_idx])
+            summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
+                          for idx_map in crystal_atom_idx]
+            #print(summed_fea)
+        elif pooltype == 'none':
+            return atom_fea
+        else:
+            raise ValueError("unallowed pooltype. must be in {'all','0'}")
+
 
         return torch.cat(summed_fea,dim=0)
 
@@ -634,10 +660,11 @@ class SpookyModelVectorized(nn.Module):
 
     def __init__(self, orig_atom_fea_len, atom_fea_len=64, n_conv=3, 
                        h_fea_len=128, n_h=1, K=4, all_elems = [0], global_fea_len=0,
-                       njmax = 75):
+                       njmax = 75, pooltype='all'):
         super(SpookyModelVectorized, self).__init__()
 
         self.n_h = n_h
+        self.pooltype = pooltype
 
         self.embedding = nn.Linear(orig_atom_fea_len, atom_fea_len)
        
@@ -669,7 +696,7 @@ class SpookyModelVectorized(nn.Module):
             atom_fea = conv_func(atom_fea, nbr_fea_idx, 
                                  gs_fea, gp_fea, gd_fea)
 
-        crys_fea = self.pooling(atom_fea, crystal_atom_idx)
+        crys_fea = self.pooling(atom_fea, crystal_atom_idx, self.pooltype)
 
         crys_fea = self.conv_to_fc(torch.cat([crys_fea, global_fea],dim=1))
 
@@ -682,20 +709,44 @@ class SpookyModelVectorized(nn.Module):
         return [out]
 
     def pooling(self, atom_fea : torch.Tensor,
-                      crystal_atom_idx : List[torch.Tensor]):
+                      crystal_atom_idx : List[torch.Tensor],
+                      pooltype : str):
+        """
+        Pooling the atom features to crystal features
 
-        # TODO implement flexibility for pooling type from function arguments
+        N: Total number of atoms in the batch
+        N0: Total number of crystals in the batch
 
-        # If pooling requires a summing/avging/etc over all atoms in crystal
-        #summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
-        #              for idx_map in crystal_atom_idx]
+        Parameters
+        ----------
 
-        # If, instead of pooling, simply want the feature vec of a single atom
-        summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
-                      for idx_map in crystal_atom_idx]
+        atom_fea: Variable(torch.Tensor) shape (N, atom_fea_len)
+          Atom feature vectors of the batch
+        crystal_atom_idx: list of torch.LongTensor of length N0
+          Mapping from the crystal idx to atom idx
+          Must be a list of tensors since each idx_map is 
+            tensor of different size (number of atoms in that crystal)
+        """
+        #assert torch.sum(torch.tensor([len(idx_map) for idx_map in\
+        #    crystal_atom_idx])) == atom_fea.data.shape[0]
 
-        # If we want to pool the feature vecs of only select atoms
-        # etc
+
+        # 1. normal pooling
+        if pooltype == 'all':
+            summed_fea = [torch.mean(atom_fea[idx_map], dim=0, keepdim=True)
+                          for idx_map in crystal_atom_idx]
+        elif pooltype == '0':
+            # 2. for defect, we are really only interested with the feature
+            # vector of the node that would become the defect
+            #print([idx_map[0] for idx_map in crystal_atom_idx])
+            summed_fea = [torch.index_select(atom_fea,0,idx_map[0])\
+                          for idx_map in crystal_atom_idx]
+            #print(summed_fea)
+        elif pooltype == 'none':
+            return atom_fea
+        else:
+            raise ValueError("unallowed pooltype. must be in {'all','0'}")
+
 
         return torch.cat(summed_fea,dim=0)
 

@@ -116,6 +116,8 @@ parser.add_argument('--njmax', default=75, type=int,
                     help='Max num nbrs for sph harm featurization')
 parser.add_argument('--init-embed-file',default='atom_init.json', type=str,
                     help='file for the initial atom embeddings (based only on elemental identity)')
+parser.add_argument("--pooltype", default='all', type=str,
+                    help='{all, 0} for normal pooling vs. just extracting index 0 atom fea vector')
 
 
 args = parser.parse_args(sys.argv[1:])
@@ -207,8 +209,9 @@ def main():
                                                            'classification' else False,
                                     Fxyz=True if args.task == 'Fxyz' else False, #MW
                                     all_elems=args.all_elems, #MW
-                                    global_fea_len=global_fea_len,
-                                    o_fea_len=args.o_fea_len) #MW
+                                    global_fea_len=global_fea_len, # MW
+                                    o_fea_len=args.o_fea_len, # MW
+                                    pooltype=args.pooltype) #MW
     elif args.model_type == 'spooky':
         if args.njmax > 0:
             model = SpookyModelVectorized(orig_atom_fea_len,
@@ -217,7 +220,8 @@ def main():
                                           h_fea_len = args.h_fea_len,
                                           n_h = args.n_h,
                                           global_fea_len = global_fea_len,
-                                          njmax = args.njmax) #MW
+                                          njmax = args.njmax,
+                                          pooltype=args.pooltype) #MW
         else:
             # TODO: to be discontinued once final testing done
             model = SpookyModel(orig_atom_fea_len,
