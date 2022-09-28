@@ -3,7 +3,6 @@ from setuptools import setup
 setup(name='cgcnndefect',
       version='0.1',
       description='Custom cgcnn version with various updates',
-      #url='http://github.com/mwitman1/heahydrides',
       author='Matthew Witman',
       author_email='mwitman1@sandia.gov',
       license='MIT',
