@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       In4Ni2O8
+_chemical_formula_sum              "In4 Ni2 O8"
+_cell_length_a       6.32569
+_cell_length_b       6.32573
+_cell_length_c       6.427
+_cell_angle_alpha    59.4685
+_cell_angle_beta     59.469
+_cell_angle_gamma    59.8477
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  In  In1       1.0  0.99639  0.99639  0.00355  1.0000
+  In  In1       1.0  0.25361  0.25361  0.24630  1.0000
+  In  In2       1.0  0.62501  0.62501  0.62506  1.0000
+  In  In2       1.0  0.62499  0.62499  0.12509  1.0000
+  Ni  Ni1       1.0  0.62500  0.12500  0.62497  1.0000
+  Ni  Ni1       1.0  0.12500  0.62500  0.62497  1.0000
+  O   O1        1.0  0.87291  0.40363  0.86178  1.0000
+  O   O1        1.0  0.40363  0.87291  0.86178  1.0000
+  O   O1        1.0  0.84638  0.37709  0.38832  1.0000
+  O   O1        1.0  0.37709  0.84638  0.38831  1.0000
+  O   O2        1.0  0.86962  0.86962  0.85339  1.0000
+  O   O2        1.0  0.86966  0.86965  0.40728  1.0000
+  O   O2        1.0  0.38037  0.38038  0.84260  1.0000
+  O   O2        1.0  0.38034  0.38034  0.39659  1.0000

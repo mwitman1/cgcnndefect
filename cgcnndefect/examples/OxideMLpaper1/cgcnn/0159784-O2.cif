@@ -1,0 +1,41 @@
+data_image0
+_chemical_formula_structural       OFeO2FeO7Ti4
+_chemical_formula_sum              "O10 Fe2 Ti4"
+_cell_length_a       3.79506
+_cell_length_b       5.30218
+_cell_length_c       10.2095
+_cell_angle_alpha    90
+_cell_angle_beta     90
+_cell_angle_gamma    110.966
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O2        1.0  0.95414  0.90825  0.61220  1.0000
+  Fe  Fe1       1.0  0.19127  0.38249  0.25000  1.0000
+  O   O1        1.0  0.20795  0.41589  0.75000  1.0000
+  O   O1        1.0  0.79205  0.58411  0.25000  1.0000
+  Fe  Fe1       1.0  0.80873  0.61751  0.75000  1.0000
+  O   O2        1.0  0.04586  0.09175  0.38780  1.0000
+  O   O2        1.0  0.95414  0.90825  0.88780  1.0000
+  O   O2        1.0  0.04586  0.09175  0.11220  1.0000
+  O   O3        1.0  0.68637  0.37271  0.55877  1.0000
+  O   O3        1.0  0.31363  0.62729  0.44123  1.0000
+  O   O3        1.0  0.68637  0.37271  0.94123  1.0000
+  O   O3        1.0  0.31363  0.62729  0.05877  1.0000
+  Ti  Ti1       1.0  0.86517  0.73041  0.06641  1.0000
+  Ti  Ti1       1.0  0.13483  0.26959  0.93359  1.0000
+  Ti  Ti1       1.0  0.86517  0.73041  0.43359  1.0000
+  Ti  Ti1       1.0  0.13483  0.26959  0.56641  1.0000

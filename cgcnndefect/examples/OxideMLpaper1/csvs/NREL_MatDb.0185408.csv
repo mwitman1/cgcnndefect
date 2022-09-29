@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,2,0,1.712,,,,,,,Ba1Mn2O8,1.732,-1.4768,9.276,DFT_PBE_U
+V_O,1,0,0.6038,,,,,,,Ba1Mn2O8,1.732,-1.4768,9.276,DFT_PBE_U
+V_Mn,1,0,5.1192,,,,,,,Ba1Mn2O8,1.732,-1.4768,9.276,DFT_PBE_U
+V_Ba,1,0,11.7679,,,,,,,Ba1Mn2O8,1.732,-1.4768,9.276,DFT_PBE_U

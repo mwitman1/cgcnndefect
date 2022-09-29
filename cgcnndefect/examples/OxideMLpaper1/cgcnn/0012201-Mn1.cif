@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       MnFe4MnO8
+_chemical_formula_sum              "Mn2 Fe4 O8"
+_cell_length_a       6.09889
+_cell_length_b       6.09889
+_cell_length_c       6.06976
+_cell_angle_alpha    60.1578
+_cell_angle_beta     60.1579
+_cell_angle_gamma    59.6843
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Mn  Mn1       1.0  0.99826  0.99826  0.00174  1.0000
+  Fe  Fe1       1.0  0.62157  0.62157  0.62507  1.0000
+  Fe  Fe1       1.0  0.62493  0.11822  0.62843  1.0000
+  Fe  Fe1       1.0  0.11822  0.62493  0.62843  1.0000
+  Fe  Fe1       1.0  0.62157  0.62157  0.13178  1.0000
+  Mn  Mn1       1.0  0.24826  0.24826  0.25174  1.0000
+  O   O1        1.0  0.86406  0.86406  0.86141  1.0000
+  O   O1        1.0  0.86406  0.86406  0.41046  1.0000
+  O   O1        1.0  0.86652  0.41395  0.85976  1.0000
+  O   O1        1.0  0.41395  0.86652  0.85976  1.0000
+  O   O1        1.0  0.83954  0.38859  0.38594  1.0000
+  O   O1        1.0  0.38859  0.83954  0.38594  1.0000
+  O   O1        1.0  0.39024  0.39024  0.83605  1.0000
+  O   O1        1.0  0.39024  0.39024  0.38348  1.0000

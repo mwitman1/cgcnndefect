@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,6.2107,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_O,2,0,6.3909,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_O,4,0,6.7006,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_O,1,0,6.2426,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_Ca,1,0,10.7687,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_Al,2,0,12.9581,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U
+V_Al,1,0,13.354,,,,,,,Al4Ca1O7,4.0231,-3.4637,1.925,DFT_PBE_U

@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Y,1,0,14.1423,,,,,,,Al5O12Y3,4.8435,-3.6877,2.221,DFT_PBE_U
+V_O,1,0,6.6039,,,,,,,Al5O12Y3,4.8435,-3.6877,2.221,DFT_PBE_U
+V_Al,2,0,12.4005,,,,,,,Al5O12Y3,4.8435,-3.6877,2.221,DFT_PBE_U
+V_Al,1,0,13.7956,,,,,,,Al5O12Y3,4.8435,-3.6877,2.221,DFT_PBE_U

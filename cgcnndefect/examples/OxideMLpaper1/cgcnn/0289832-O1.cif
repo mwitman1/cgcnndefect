@@ -1,0 +1,35 @@
+data_image0
+_chemical_formula_structural       OAlCe2AlO5
+_chemical_formula_sum              "O6 Al2 Ce2"
+_cell_length_a       5.38744
+_cell_length_b       5.35181
+_cell_length_c       5.39446
+_cell_angle_alpha    60.2652
+_cell_angle_beta     60.0432
+_cell_angle_gamma    89.9998
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O1        1.0  0.71873  0.78214  0.00005  1.0000
+  Al  Al1       1.0  0.49999  0.50001  1.00000  1.0000
+  Ce  Ce1       1.0  0.74991  0.25000  0.50000  1.0000
+  Ce  Ce1       1.0  0.24993  0.75000  0.50000  1.0000
+  Al  Al1       1.0  0.99999  0.99999  0.00000  1.0000
+  O   O1        1.0  0.78133  0.28221  0.00005  1.0000
+  O   O1        1.0  0.21877  0.71786  0.99995  1.0000
+  O   O1        1.0  0.28137  0.21779  0.99995  1.0000
+  O   O2        1.0  0.24994  0.25000  0.50000  1.0000
+  O   O2        1.0  0.75002  0.75000  0.50000  1.0000

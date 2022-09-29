@@ -1,0 +1,4 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,1,0,6.451,,,,,,,Al1La1O3,3.9699,-3.7038,2.401,DFT_PBE_U
+V_La,1,0,12.069,,,,,,,Al1La1O3,3.9699,-3.7038,2.401,DFT_PBE_U
+V_Al,1,0,12.5532,,,,,,,Al1La1O3,3.9699,-3.7038,2.401,DFT_PBE_U

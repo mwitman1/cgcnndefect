@@ -1,0 +1,41 @@
+data_image0
+_chemical_formula_structural       OAl3O2AlO7Ti2
+_chemical_formula_sum              "O10 Al4 Ti2"
+_cell_length_a       3.62904
+_cell_length_b       5.07137
+_cell_length_c       9.79101
+_cell_angle_alpha    90
+_cell_angle_beta     90
+_cell_angle_gamma    110.965
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O2        1.0  0.04419  0.08830  0.38361  1.0000
+  Al  Al1       1.0  0.85991  0.71982  0.05574  1.0000
+  Al  Al1       1.0  0.14009  0.28018  0.55574  1.0000
+  Al  Al1       1.0  0.85991  0.71982  0.44426  1.0000
+  O   O1        1.0  0.76472  0.52942  0.25000  1.0000
+  O   O1        1.0  0.23528  0.47058  0.75000  1.0000
+  Al  Al1       1.0  0.14009  0.28018  0.94426  1.0000
+  O   O2        1.0  0.95581  0.91170  0.61639  1.0000
+  O   O2        1.0  0.04419  0.08830  0.11639  1.0000
+  O   O2        1.0  0.95581  0.91170  0.88361  1.0000
+  O   O3        1.0  0.31158  0.62316  0.43317  1.0000
+  O   O3        1.0  0.68842  0.37684  0.56683  1.0000
+  O   O3        1.0  0.31158  0.62316  0.06683  1.0000
+  O   O3        1.0  0.68842  0.37684  0.93317  1.0000
+  Ti  Ti1       1.0  0.18395  0.36788  0.25000  1.0000
+  Ti  Ti1       1.0  0.81605  0.63212  0.75000  1.0000

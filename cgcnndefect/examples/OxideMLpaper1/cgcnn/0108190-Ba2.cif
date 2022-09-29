@@ -1,0 +1,41 @@
+data_image0
+_chemical_formula_structural       Ba3O9Y4
+_chemical_formula_sum              "Ba3 O9 Y4"
+_cell_length_a       6.21183
+_cell_length_b       6.21185
+_cell_length_c       9.38984
+_cell_angle_alpha    70.6869
+_cell_angle_beta     70.6887
+_cell_angle_gamma    60
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ba  Ba2       1.0  0.16571  0.16569  0.50294  1.0000
+  Ba  Ba1       1.0  0.99772  0.99774  0.00674  1.0000
+  Ba  Ba3       1.0  0.58843  0.58844  0.23467  1.0000
+  O   O1        1.0  0.00926  0.15208  0.25544  1.0000
+  O   O1        1.0  0.58322  0.00928  0.25544  1.0000
+  O   O1        1.0  0.15205  0.58325  0.25544  1.0000
+  O   O2        1.0  0.56964  0.11783  0.59133  1.0000
+  O   O2        1.0  0.72124  0.56959  0.59133  1.0000
+  O   O2        1.0  0.11788  0.72119  0.59133  1.0000
+  O   O3        1.0  0.45134  0.03820  0.92745  1.0000
+  O   O3        1.0  0.58295  0.45138  0.92746  1.0000
+  O   O3        1.0  0.03819  0.58301  0.92745  1.0000
+  Y   Y1        1.0  0.42496  0.42493  0.72522  1.0000
+  Y   Y2        1.0  0.86297  0.86296  0.41113  1.0000
+  Y   Y3        1.0  0.73814  0.73813  0.78552  1.0000
+  Y   Y4        1.0  0.29929  0.29932  0.10210  1.0000

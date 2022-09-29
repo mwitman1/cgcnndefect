@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,4.3313,,,,,,,Nb2O5,2.0917,-2.8694,1.807,DFT_PBE_U
+V_O,2,0,5.3219,,,,,,,Nb2O5,2.0917,-2.8694,1.807,DFT_PBE_U
+V_O,1,0,5.8598,,,,,,,Nb2O5,2.0917,-2.8694,1.807,DFT_PBE_U
+V_Nb,1,0,16.5181,,,,,,,Nb2O5,2.0917,-2.8694,1.807,DFT_PBE_U

@@ -1,0 +1,6 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,5.8447,,,,,,,Mn1Nb2O6,2.4343,-2.759,8.172,DFT_PBE_U
+V_O,2,0,5.4229,,,,,,,Mn1Nb2O6,2.4343,-2.759,8.172,DFT_PBE_U
+V_O,1,0,5.4219,,,,,,,Mn1Nb2O6,2.4343,-2.759,8.172,DFT_PBE_U
+V_Nb,1,0,11.0435,,,,,,,Mn1Nb2O6,2.4343,-2.759,8.172,DFT_PBE_U
+V_Mn,1,0,5.2423,,,,,,,Mn1Nb2O6,2.4343,-2.759,8.172,DFT_PBE_U

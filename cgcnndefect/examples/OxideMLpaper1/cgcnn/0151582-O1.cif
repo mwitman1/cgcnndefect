@@ -1,0 +1,37 @@
+data_image0
+_chemical_formula_structural       ONbAl2NbO7
+_chemical_formula_sum              "O8 Nb2 Al2"
+_cell_length_a       3.84687
+_cell_length_b       6.46352
+_cell_length_c       6.55236
+_cell_angle_alpha    106.86
+_cell_angle_beta     90.0007
+_cell_angle_gamma    107.311
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O1        1.0  0.14048  0.28095  0.52853  1.0000
+  Nb  Nb1       1.0  0.10544  0.21086  0.23477  1.0000
+  Al  Al1       1.0  0.20157  0.40313  0.82297  1.0000
+  Al  Al1       1.0  0.79843  0.59687  0.17703  1.0000
+  Nb  Nb1       1.0  0.89456  0.78914  0.76523  1.0000
+  O   O1        1.0  0.85952  0.71905  0.47147  1.0000
+  O   O2        1.0  0.05856  0.11711  0.86499  1.0000
+  O   O2        1.0  0.94144  0.88289  0.13501  1.0000
+  O   O3        1.0  0.73696  0.47392  0.85918  1.0000
+  O   O3        1.0  0.26304  0.52608  0.14082  1.0000
+  O   O4        1.0  0.35571  0.71143  0.79464  1.0000
+  O   O4        1.0  0.64429  0.28857  0.20536  1.0000

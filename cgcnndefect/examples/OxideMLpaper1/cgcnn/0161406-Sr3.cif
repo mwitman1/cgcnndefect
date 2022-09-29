@@ -1,0 +1,44 @@
+data_image0
+_chemical_formula_structural       Sr4Fe4O11
+_chemical_formula_sum              "Sr4 Fe4 O11"
+_cell_length_a       5.51698
+_cell_length_b       6.7617
+_cell_length_c       6.7617
+_cell_angle_alpha    109.904
+_cell_angle_beta     90
+_cell_angle_gamma    90
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Sr  Sr3       1.0  1.00000  0.25692  0.74308  1.0000
+  Sr  Sr2       1.0  0.50000  0.00163  0.99837  1.0000
+  Sr  Sr1       1.0  0.50000  0.50061  0.49937  1.0000
+  Sr  Sr3       1.0  0.00000  0.74137  0.25863  1.0000
+  Fe  Fe1       1.0  1.00000  0.25356  0.25499  1.0000
+  Fe  Fe1       1.0  1.00000  0.74501  0.74644  1.0000
+  Fe  Fe2       1.0  0.50000  0.00160  0.49693  1.0000
+  Fe  Fe2       1.0  0.50000  0.50307  0.99840  1.0000
+  O   O1        1.0  1.00000  0.49764  0.50236  1.0000
+  O   O2        1.0  0.50000  0.27044  0.72956  1.0000
+  O   O2        1.0  0.50000  0.72747  0.27253  1.0000
+  O   O3        1.0  0.23715  0.10116  0.33962  1.0000
+  O   O3        1.0  0.23566  0.89522  0.65641  1.0000
+  O   O3        1.0  0.76285  0.66038  0.89885  1.0000
+  O   O3        1.0  0.76434  0.34359  0.10479  1.0000
+  O   O3        1.0  0.76434  0.89522  0.65641  1.0000
+  O   O3        1.0  0.76285  0.10116  0.33962  1.0000
+  O   O3        1.0  0.23566  0.34359  0.10479  1.0000
+  O   O3        1.0  0.23715  0.66038  0.89885  1.0000

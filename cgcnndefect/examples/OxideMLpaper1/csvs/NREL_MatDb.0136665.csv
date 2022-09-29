@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,6.684,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_Sr,2,0,6.7438,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_O,3,0,2.4099,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_O,2,0,2.4646,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_O,1,0,2.3741,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_Co,2,0,4.0988,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U
+V_Co,1,0,4.5432,,,,,,,Co2O6Sr3,1.014,-2.378,9.525,DFT_PBE_U

@@ -1,0 +1,36 @@
+data_image0
+_chemical_formula_structural       InBa3InO6
+_chemical_formula_sum              "In2 Ba3 O6"
+_cell_length_a       4.25742
+_cell_length_b       4.25742
+_cell_length_c       11.3867
+_cell_angle_alpha    100.773
+_cell_angle_beta     100.773
+_cell_angle_gamma    89.9993
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  In  In1       1.0  0.89717  0.89717  0.79454  1.0000
+  Ba  Ba2       1.0  0.31696  0.31696  0.63398  1.0000
+  Ba  Ba2       1.0  0.68304  0.68304  0.36602  1.0000
+  Ba  Ba1       1.0  0.50000  0.50000  0.00000  1.0000
+  In  In1       1.0  0.10283  0.10283  0.20546  1.0000
+  O   O1        1.0  0.91609  0.41605  0.83227  1.0000
+  O   O1        1.0  0.41605  0.91609  0.83227  1.0000
+  O   O1        1.0  0.08391  0.58395  0.16773  1.0000
+  O   O1        1.0  0.58395  0.08391  0.16773  1.0000
+  O   O2        1.0  0.80128  0.80128  0.60278  1.0000
+  O   O2        1.0  0.19872  0.19872  0.39722  1.0000

@@ -1,0 +1,7 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,5.2022,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U
+V_O,2,0,5.4031,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U
+V_O,1,0,5.1039,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U
+V_La,1,0,8.228,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U
+V_Co,2,0,2.5191,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U
+V_Co,1,0,2.4177,,,,,,,Co2La2O5,1.937,-2.717,3.059,DFT_PBE_U

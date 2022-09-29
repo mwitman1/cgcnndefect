@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       Al4Ni2O8
+_chemical_formula_sum              "Al4 Ni2 O8"
+_cell_length_a       5.73669
+_cell_length_b       5.73669
+_cell_length_c       5.78475
+_cell_angle_alpha    59.7228
+_cell_angle_beta     59.7228
+_cell_angle_gamma    59.1977
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Al  Al2       1.0  0.62500  0.62500  0.62500  1.0000
+  Al  Al1       1.0  0.25774  0.25774  0.24225  1.0000
+  Al  Al1       1.0  0.99226  0.99226  0.00775  1.0000
+  Al  Al2       1.0  0.62500  0.62500  0.12500  1.0000
+  Ni  Ni1       1.0  0.62500  0.12500  0.62500  1.0000
+  Ni  Ni1       1.0  0.12500  0.62500  0.62500  1.0000
+  O   O1        1.0  0.85601  0.38651  0.87874  1.0000
+  O   O1        1.0  0.38651  0.85601  0.87874  1.0000
+  O   O1        1.0  0.86349  0.39399  0.37126  1.0000
+  O   O1        1.0  0.39399  0.86349  0.37126  1.0000
+  O   O2        1.0  0.85895  0.85896  0.89336  1.0000
+  O   O2        1.0  0.85895  0.85894  0.38874  1.0000
+  O   O2        1.0  0.39105  0.39106  0.86126  1.0000
+  O   O2        1.0  0.39105  0.39104  0.35664  1.0000

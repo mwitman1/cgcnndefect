@@ -2,4 +2,5 @@ pymatgen
 ase
 torch
 numpy
-sklearn
+scikit-learn
+watermark

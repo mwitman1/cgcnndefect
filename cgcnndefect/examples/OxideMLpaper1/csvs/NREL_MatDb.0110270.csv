@@ -1,0 +1,7 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,7.8693,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U
+V_O,3,0,3.8089,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U
+V_O,2,0,3.2738,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U
+V_O,1,0,4.0388,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U
+V_In,2,0,6.9057,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U
+V_In,1,0,7.4772,,,,,,,In2O5Sr2,0.9938,-2.4446,1.257,DFT_PBE_U

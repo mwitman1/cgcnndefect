@@ -1,0 +1,6 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,2,0,3.4805,,,,,,,In2Ni1O4,0.4499,-1.6912,1.088,DFT_PBE_U
+V_O,1,0,3.6058,,,,,,,In2Ni1O4,0.4499,-1.6912,1.088,DFT_PBE_U
+V_Ni,1,0,4.0608,,,,,,,In2Ni1O4,0.4499,-1.6912,1.088,DFT_PBE_U
+V_In,2,0,7.2399,,,,,,,In2Ni1O4,0.4499,-1.6912,1.088,DFT_PBE_U
+V_In,1,0,6.4228,,,,,,,In2Ni1O4,0.4499,-1.6912,1.088,DFT_PBE_U

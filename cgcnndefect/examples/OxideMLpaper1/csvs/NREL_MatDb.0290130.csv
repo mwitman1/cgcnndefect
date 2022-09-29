@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,8.8554,,,,,,,Ce1O3Sr1,2.512,-3.5177,36.855,DFT_PBE_U
+V_O,2,0,5.1089,,,,,,,Ce1O3Sr1,2.512,-3.5177,36.855,DFT_PBE_U
+V_O,1,0,5.1286,,,,,,,Ce1O3Sr1,2.512,-3.5177,36.855,DFT_PBE_U
+V_Ce,1,0,15.9337,,,,,,,Ce1O3Sr1,2.512,-3.5177,36.855,DFT_PBE_U

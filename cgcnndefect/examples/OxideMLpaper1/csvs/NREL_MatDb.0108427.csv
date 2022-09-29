@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,10.5887,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_O,3,0,6.1625,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_O,2,0,6.3726,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_O,4,0,6.7311,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_O,1,0,6.1601,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_Al,2,0,13.0063,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U
+V_Al,1,0,13.4401,,,,,,,Al4O7Sr1,3.7524,-3.4755,1.857,DFT_PBE_U

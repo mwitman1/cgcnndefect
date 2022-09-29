@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Ti,1,0,14.1137,,,,,,,Ba1O3Ti1,1.8599,-3.3675,2.167,DFT_PBE_U
+V_O,2,0,5.4037,,,,,,,Ba1O3Ti1,1.8599,-3.3675,2.167,DFT_PBE_U
+V_O,1,0,5.3369,,,,,,,Ba1O3Ti1,1.8599,-3.3675,2.167,DFT_PBE_U
+V_Ba,1,0,8.7729,,,,,,,Ba1O3Ti1,1.8599,-3.3675,2.167,DFT_PBE_U

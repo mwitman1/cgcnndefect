@@ -1,0 +1,45 @@
+data_image0
+_chemical_formula_structural       Ca4O12Ce4
+_chemical_formula_sum              "Ca4 O12 Ce4"
+_cell_length_a       5.86535
+_cell_length_b       8.5508
+_cell_length_c       6.07916
+_cell_angle_alpha    90
+_cell_angle_beta     90
+_cell_angle_gamma    90
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ca  Ca1       1.0  0.98825  0.25000  0.04839  1.0000
+  Ca  Ca1       1.0  0.51175  0.25000  0.54839  1.0000
+  Ca  Ca1       1.0  0.01175  0.75000  0.95161  1.0000
+  Ca  Ca1       1.0  0.48825  0.75000  0.45161  1.0000
+  O   O1        1.0  0.36697  0.25000  0.92740  1.0000
+  O   O1        1.0  0.13303  0.25000  0.42740  1.0000
+  O   O1        1.0  0.63303  0.75000  0.07260  1.0000
+  O   O1        1.0  0.86697  0.75000  0.57260  1.0000
+  O   O2        1.0  0.18722  0.92829  0.18927  1.0000
+  O   O2        1.0  0.31278  0.57171  0.68927  1.0000
+  O   O2        1.0  0.31278  0.92829  0.68927  1.0000
+  O   O2        1.0  0.81278  0.42829  0.81073  1.0000
+  O   O2        1.0  0.81278  0.07171  0.81073  1.0000
+  O   O2        1.0  0.68722  0.42829  0.31073  1.0000
+  O   O2        1.0  0.68722  0.07171  0.31073  1.0000
+  O   O2        1.0  0.18722  0.57171  0.18927  1.0000
+  Ce  Ce1       1.0  0.50000  0.00000  1.00000  1.0000
+  Ce  Ce1       1.0  1.00000  0.50000  0.50000  1.0000
+  Ce  Ce1       1.0  1.00000  0.00000  0.50000  1.0000
+  Ce  Ce1       1.0  0.50000  0.50000  0.00000  1.0000

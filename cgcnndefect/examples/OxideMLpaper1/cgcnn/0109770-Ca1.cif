@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       Ca2In4O8
+_chemical_formula_sum              "Ca2 In4 O8"
+_cell_length_a       6.63521
+_cell_length_b       6.63521
+_cell_length_c       6.63561
+_cell_angle_alpha    119.998
+_cell_angle_beta     119.998
+_cell_angle_gamma    89.9999
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ca  Ca1       1.0  0.25000  0.75000  0.50000  1.0000
+  Ca  Ca1       1.0  1.00000  0.00000  0.00000  1.0000
+  In  In1       1.0  0.12500  0.37500  0.75000  1.0000
+  In  In1       1.0  0.62500  0.37500  0.75000  1.0000
+  In  In1       1.0  0.62500  0.87500  0.25000  1.0000
+  In  In1       1.0  0.62500  0.37500  0.25000  1.0000
+  O   O1        1.0  0.41507  0.13837  0.27675  1.0000
+  O   O1        1.0  0.86168  0.13837  0.27675  1.0000
+  O   O1        1.0  0.38832  0.61163  0.22326  1.0000
+  O   O1        1.0  0.83494  0.61163  0.22326  1.0000
+  O   O1        1.0  0.86163  0.58493  0.72325  1.0000
+  O   O1        1.0  0.86163  0.13832  0.72325  1.0000
+  O   O1        1.0  0.38837  0.61168  0.77674  1.0000
+  O   O1        1.0  0.38837  0.16506  0.77674  1.0000

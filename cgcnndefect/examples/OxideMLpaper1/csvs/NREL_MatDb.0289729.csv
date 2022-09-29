@@ -1,0 +1,4 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,1,0,3.5519,,,,,,,Ca1Ce1O3,2.5,-3.495,37.141,DFT_PBE_U
+V_Ce,1,0,15.2809,,,,,,,Ca1Ce1O3,2.5,-3.495,37.141,DFT_PBE_U
+V_Ca,1,0,7.7504,,,,,,,Ca1Ce1O3,2.5,-3.495,37.141,DFT_PBE_U

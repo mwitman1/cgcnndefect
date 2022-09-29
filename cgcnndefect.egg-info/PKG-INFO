@@ -1,10 +1,10 @@
 Metadata-Version: 2.1
 Name: cgcnndefect
 Version: 0.1
-Summary: Custom cgcnn version with various updates
+Summary: Custom defect cgcnn version with various updates
 Home-page: UNKNOWN
 Author: Matthew Witman
-Author-email: mwitman1@sandia.gov
+Author-email: mwitman@sandia.gov
 License: MIT
 Platform: UNKNOWN
 Requires-Python: >3.6

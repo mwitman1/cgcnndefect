@@ -53,14 +53,13 @@ def get_train_val_test_loader(dataset, collate_fn=default_collate,
       DataLoader that random samples the test data, returns if
         return_test=True.
     """
-    print('num_workers ', num_workers)
     #torch.set_num_threads(1)
     #torch.multiprocessing.set_sharing_strategy('file_system')
     total_size = len(dataset)
     if train_ratio is None:
         assert val_ratio + test_ratio < 1
         train_ratio = 1 - val_ratio - test_ratio
-        print('[Warning] train_ratio is None, using all training data.')
+        #print('[Warning] train_ratio is None, using all training data.')
     else:
         assert train_ratio + val_ratio + test_ratio <= 1
     indices = list(range(total_size))

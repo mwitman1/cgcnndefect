@@ -1,0 +1,35 @@
+data_image0
+_chemical_formula_structural       OLaMn2LaO5
+_chemical_formula_sum              "O6 La2 Mn2"
+_cell_length_a       5.59369
+_cell_length_b       5.59414
+_cell_length_c       5.5569
+_cell_angle_alpha    60.6461
+_cell_angle_beta     60.6424
+_cell_angle_gamma    63.6089
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O1        1.0  0.20287  0.84349  0.69037  1.0000
+  La  La1       1.0  0.23516  0.26488  0.24992  1.0000
+  Mn  Mn1       1.0  -0.00000  0.00000  1.00000  1.0000
+  Mn  Mn1       1.0  0.50000  0.50000  0.50000  1.0000
+  La  La1       1.0  0.76484  0.73512  0.75008  1.0000
+  O   O1        1.0  0.34323  0.70260  0.19060  1.0000
+  O   O1        1.0  0.65677  0.29740  0.80940  1.0000
+  O   O1        1.0  0.79713  0.15651  0.30963  1.0000
+  O   O2        1.0  0.81053  0.68946  0.24968  1.0000
+  O   O2        1.0  0.18947  0.31054  0.75032  1.0000

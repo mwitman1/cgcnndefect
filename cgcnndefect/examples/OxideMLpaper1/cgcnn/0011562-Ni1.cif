@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       NiFe4NiO8
+_chemical_formula_sum              "Ni2 Fe4 O8"
+_cell_length_a       5.92244
+_cell_length_b       5.95969
+_cell_length_c       5.95421
+_cell_angle_alpha    60.0302
+_cell_angle_beta     59.8226
+_cell_angle_gamma    60.0318
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ni  Ni1       1.0  0.62500  0.12500  0.62500  1.0000
+  Fe  Fe1       1.0  0.25509  0.25123  0.24684  1.0000
+  Fe  Fe2       1.0  0.62500  0.62500  0.62500  1.0000
+  Fe  Fe2       1.0  0.62500  0.62500  0.12500  1.0000
+  Fe  Fe1       1.0  0.99491  0.99877  0.00316  1.0000
+  Ni  Ni1       1.0  0.12500  0.62500  0.62500  1.0000
+  O   O1        1.0  0.86481  0.38920  0.87300  1.0000
+  O   O1        1.0  0.39237  0.85997  0.87383  1.0000
+  O   O1        1.0  0.85763  0.39003  0.37617  1.0000
+  O   O1        1.0  0.38519  0.86080  0.37700  1.0000
+  O   O2        1.0  0.86518  0.86358  0.87613  1.0000
+  O   O2        1.0  0.86519  0.86358  0.39510  1.0000
+  O   O2        1.0  0.38481  0.38642  0.85490  1.0000
+  O   O2        1.0  0.38482  0.38642  0.37387  1.0000

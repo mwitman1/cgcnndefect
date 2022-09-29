@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Y,1,0,12.5383,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_Y,2,0,13.1189,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_O,3,0,6.6636,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_O,2,0,6.5873,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_O,4,0,6.6262,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_O,1,0,6.5688,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U
+V_Ba,1,0,7.3422,,,,,,,Ba1O4Y2,3.4285,-3.657,1.28,DFT_PBE_U

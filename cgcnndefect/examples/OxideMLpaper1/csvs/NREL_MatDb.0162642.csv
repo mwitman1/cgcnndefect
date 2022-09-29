@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Y,1,0,12.5851,,,,,,,Fe5O12Y3,1.7684,-2.6017,7.429,DFT_PBE_U
+V_O,1,0,3.958,,,,,,,Fe5O12Y3,1.7684,-2.6017,7.429,DFT_PBE_U
+V_Fe,1,0,7.8029,,,,,,,Fe5O12Y3,1.7684,-2.6017,7.429,DFT_PBE_U
+V_Fe,2,0,6.495,,,,,,,Fe5O12Y3,1.7684,-2.6017,7.429,DFT_PBE_U

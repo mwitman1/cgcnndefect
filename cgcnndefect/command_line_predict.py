@@ -48,11 +48,11 @@ parser.add_argument('--csv-ext', default='', type=str,
 
 args = parser.parse_args(sys.argv[1:])
 if os.path.isfile(args.modelpath):
-    print("=> loading model params '{}'".format(args.modelpath))
+    #print("=> loading model params '{}'".format(args.modelpath))
     model_checkpoint = torch.load(args.modelpath,
                                   map_location=lambda storage, loc: storage)
     model_args = argparse.Namespace(**model_checkpoint['args'])
-    print("=> loaded model params '{}'".format(args.modelpath))
+    #print("=> loaded model params '{}'".format(args.modelpath))
 else:
     print("=> no model params found at '{}'".format(args.modelpath))
 
@@ -92,7 +92,7 @@ def main():
         global_fea_len = len(structures[7])
     else:
         global_fea_len = 0
-    print("Potential applicable to: ", dataset.all_elems)
+    #print("Potential applicable to: ", dataset.all_elems)
 
     if model_args.model_type == 'cgcnn':
         model = CrystalGraphConvNet(orig_atom_fea_len, nbr_fea_len,

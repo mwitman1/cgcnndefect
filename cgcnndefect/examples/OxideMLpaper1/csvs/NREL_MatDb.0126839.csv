@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,9.178,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_Sr,2,0,9.6144,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_O,3,0,1.9142,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_O,2,0,2.6973,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_O,4,0,1.9025,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_O,1,0,2.6833,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U
+V_Mn,1,0,9.0864,,,,,,,Mn1O3Sr1,1.8446,-2.5095,10.743,DFT_PBE_U

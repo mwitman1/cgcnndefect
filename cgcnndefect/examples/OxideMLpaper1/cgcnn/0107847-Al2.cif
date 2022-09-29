@@ -1,0 +1,43 @@
+data_image0
+_chemical_formula_structural       Al4Ca4O10
+_chemical_formula_sum              "Al4 Ca4 O10"
+_cell_length_a       5.28115
+_cell_length_b       5.46079
+_cell_length_c       8.17404
+_cell_angle_alpha    109.514
+_cell_angle_beta     108.848
+_cell_angle_gamma    89.9997
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Al  Al2       1.0  0.70412  0.67533  0.50000  1.0000
+  Al  Al1       1.0  0.00310  0.00000  0.00000  1.0000
+  Al  Al1       1.0  0.50311  0.50000  0.00000  1.0000
+  Al  Al2       1.0  0.20411  0.32466  0.50000  1.0000
+  Ca  Ca1       1.0  0.38864  0.91836  0.78493  1.0000
+  Ca  Ca1       1.0  0.60372  0.08164  0.21507  1.0000
+  Ca  Ca1       1.0  0.10372  0.63343  0.21507  1.0000
+  Ca  Ca1       1.0  0.88865  0.36658  0.78493  1.0000
+  O   O1        1.0  0.66012  0.69950  0.28282  1.0000
+  O   O1        1.0  0.37730  0.30051  0.71718  1.0000
+  O   O1        1.0  0.87733  0.91668  0.71717  1.0000
+  O   O1        1.0  0.16011  0.08332  0.28282  1.0000
+  O   O2        1.0  0.86767  0.38649  0.49999  1.0000
+  O   O2        1.0  0.36767  0.61350  0.50000  1.0000
+  O   O3        1.0  0.24128  0.73679  0.97857  1.0000
+  O   O3        1.0  0.26273  0.26321  0.02145  1.0000
+  O   O3        1.0  0.76273  0.25824  0.02144  1.0000
+  O   O3        1.0  0.74127  0.74177  0.97855  1.0000

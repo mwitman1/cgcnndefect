@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Y,1,0,14.5539,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_Y,2,0,14.4131,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_O,3,0,3.9393,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_O,2,0,4.4242,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_O,4,0,3.7667,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_O,1,0,4.5724,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U
+V_In,1,0,8.5598,,,,,,,In1O3Y1,2.0438,-2.9367,0.952,DFT_PBE_U

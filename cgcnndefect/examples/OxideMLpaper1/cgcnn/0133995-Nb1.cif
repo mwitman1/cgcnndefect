@@ -1,0 +1,43 @@
+data_image0
+_chemical_formula_structural       Nb4Ba2O12
+_chemical_formula_sum              "Nb4 Ba2 O12"
+_cell_length_a       3.99137
+_cell_length_b       6.18964
+_cell_length_c       10.7274
+_cell_angle_alpha    89.9999
+_cell_angle_beta     90.0059
+_cell_angle_gamma    90
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Nb  Nb1       1.0  0.50047  0.44943  0.14902  1.0000
+  Nb  Nb1       1.0  0.49953  0.94943  0.35098  1.0000
+  Nb  Nb1       1.0  0.49953  0.55057  0.85098  1.0000
+  Nb  Nb1       1.0  0.50047  0.05057  0.64902  1.0000
+  Ba  Ba1       1.0  0.00000  1.00000  0.00000  1.0000
+  Ba  Ba1       1.0  1.00000  0.50000  0.50000  1.0000
+  O   O1        1.0  0.49995  0.30106  0.96370  1.0000
+  O   O1        1.0  0.50005  0.80105  0.53630  1.0000
+  O   O1        1.0  0.50005  0.69894  0.03630  1.0000
+  O   O1        1.0  0.49995  0.19895  0.46370  1.0000
+  O   O2        1.0  0.49997  0.11553  0.19766  1.0000
+  O   O2        1.0  0.50003  0.61553  0.30235  1.0000
+  O   O2        1.0  0.50003  0.88447  0.80234  1.0000
+  O   O2        1.0  0.49997  0.38447  0.69765  1.0000
+  O   O3        1.0  0.00008  0.41275  0.14985  1.0000
+  O   O3        1.0  0.99992  0.91275  0.35016  1.0000
+  O   O3        1.0  0.99992  0.58725  0.85015  1.0000
+  O   O3        1.0  0.00008  0.08725  0.64984  1.0000

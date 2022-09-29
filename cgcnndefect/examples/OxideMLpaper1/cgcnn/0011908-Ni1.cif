@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       NiMn4NiO8
+_chemical_formula_sum              "Ni2 Mn4 O8"
+_cell_length_a       6.12607
+_cell_length_b       6.29799
+_cell_length_c       5.73671
+_cell_angle_alpha    60.9884
+_cell_angle_beta     64.0351
+_cell_angle_gamma    54.9765
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ni  Ni1       1.0  0.98847  0.01152  0.98848  1.0000
+  Mn  Mn1       1.0  0.61736  0.62797  0.63641  1.0000
+  Mn  Mn1       1.0  0.63642  0.11825  0.61737  1.0000
+  Mn  Mn1       1.0  0.13175  0.61359  0.62203  1.0000
+  Mn  Mn1       1.0  0.62203  0.63264  0.13174  1.0000
+  Ni  Ni1       1.0  0.23846  0.26153  0.23848  1.0000
+  O   O1        1.0  0.88937  0.84291  0.86001  1.0000
+  O   O1        1.0  0.86001  0.40771  0.88937  1.0000
+  O   O1        1.0  0.84227  0.38997  0.40710  1.0000
+  O   O1        1.0  0.40710  0.36064  0.84228  1.0000
+  O   O2        1.0  0.86461  0.87590  0.39376  1.0000
+  O   O2        1.0  0.39376  0.86575  0.86459  1.0000
+  O   O2        1.0  0.38427  0.85624  0.37410  1.0000
+  O   O2        1.0  0.37410  0.38539  0.38427  1.0000

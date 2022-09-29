@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,4.9114,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_O,2,0,4.98,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_O,4,0,5.4253,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_O,1,0,5.2854,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_La,1,0,11.767,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_La,2,0,12.4054,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U
+V_Fe,1,0,7.1256,,,,,,,Fe1La3O6,2.5923,-3.3277,16.224,DFT_PBE_U

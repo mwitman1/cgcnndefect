@@ -1,0 +1,9 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,3,0,8.5385,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_Sr,1,0,8.3468,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_Sr,2,0,8.7532,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_O,3,0,1.8638,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_O,2,0,1.8585,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_O,1,0,1.7607,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_Fe,1,0,5.5942,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U
+V_Fe,2,0,5.8597,,,,,,,Fe4O11Sr4,0.6921,-2.3682,2.147,DFT_PBE_U

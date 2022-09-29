@@ -1,0 +1,41 @@
+data_image0
+_chemical_formula_structural       OMg2O9Ti4
+_chemical_formula_sum              "O10 Mg2 Ti4"
+_cell_length_a       5.27635
+_cell_length_b       5.27635
+_cell_length_c       10.1341
+_cell_angle_alpha    90
+_cell_angle_beta     90
+_cell_angle_gamma    137.947
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O1        1.0  0.04672  0.95328  0.88713  1.0000
+  Mg  Mg1       1.0  0.80488  0.19512  0.25000  1.0000
+  Mg  Mg1       1.0  0.19512  0.80488  0.75000  1.0000
+  O   O1        1.0  0.95328  0.04672  0.11287  1.0000
+  O   O1        1.0  0.04672  0.95328  0.61287  1.0000
+  O   O1        1.0  0.95328  0.04672  0.38713  1.0000
+  O   O2        1.0  0.31300  0.68700  0.93775  1.0000
+  O   O2        1.0  0.68700  0.31300  0.06225  1.0000
+  O   O2        1.0  0.31300  0.68700  0.56225  1.0000
+  O   O2        1.0  0.68700  0.31300  0.43775  1.0000
+  O   O3        1.0  0.78293  0.21707  0.75000  1.0000
+  O   O3        1.0  0.21707  0.78293  0.25000  1.0000
+  Ti  Ti1       1.0  0.86634  0.13366  0.93334  1.0000
+  Ti  Ti1       1.0  0.13366  0.86634  0.06666  1.0000
+  Ti  Ti1       1.0  0.86634  0.13366  0.56666  1.0000
+  Ti  Ti1       1.0  0.13366  0.86634  0.43334  1.0000

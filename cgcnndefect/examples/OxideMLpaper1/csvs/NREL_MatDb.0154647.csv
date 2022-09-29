@@ -1,0 +1,5 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,2,0,4.1209,,,,,,,Ba3Ni1O4,1.5908,-2.4892,9.029,DFT_PBE_U
+V_O,1,0,3.965,,,,,,,Ba3Ni1O4,1.5908,-2.4892,9.029,DFT_PBE_U
+V_Ni,1,0,3.3991,,,,,,,Ba3Ni1O4,1.5908,-2.4892,9.029,DFT_PBE_U
+V_Ba,1,0,5.906,,,,,,,Ba3Ni1O4,1.5908,-2.4892,9.029,DFT_PBE_U

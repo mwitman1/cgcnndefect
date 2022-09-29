@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       Fe4Co2O8
+_chemical_formula_sum              "Fe4 Co2 O8"
+_cell_length_a       6.02367
+_cell_length_b       6.02369
+_cell_length_c       6.00018
+_cell_angle_alpha    60.1289
+_cell_angle_beta     60.1291
+_cell_angle_gamma    59.7421
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Fe  Fe1       1.0  0.62289  0.62289  0.12899  1.0000
+  Fe  Fe1       1.0  0.62289  0.62289  0.62523  1.0000
+  Fe  Fe1       1.0  0.62477  0.12101  0.62711  1.0000
+  Fe  Fe1       1.0  0.12101  0.62477  0.62711  1.0000
+  Co  Co1       1.0  0.99882  0.99882  0.00118  1.0000
+  Co  Co1       1.0  0.24882  0.24882  0.25118  1.0000
+  O   O1        1.0  0.86535  0.86535  0.86460  1.0000
+  O   O1        1.0  0.86535  0.86535  0.40470  1.0000
+  O   O1        1.0  0.86815  0.40654  0.86265  1.0000
+  O   O1        1.0  0.40654  0.86815  0.86265  1.0000
+  O   O1        1.0  0.84530  0.38540  0.38465  1.0000
+  O   O1        1.0  0.38540  0.84530  0.38465  1.0000
+  O   O1        1.0  0.38735  0.38735  0.84346  1.0000
+  O   O1        1.0  0.38735  0.38735  0.38185  1.0000

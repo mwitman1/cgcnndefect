@@ -1,0 +1,6 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,2,0,3.9611,,,,,,,Ba3In2O6,0.8592,-2.4764,0.977,DFT_PBE_U
+V_O,1,0,3.6078,,,,,,,Ba3In2O6,0.8592,-2.4764,0.977,DFT_PBE_U
+V_In,1,0,6.942,,,,,,,Ba3In2O6,0.8592,-2.4764,0.977,DFT_PBE_U
+V_Ba,2,0,7.8812,,,,,,,Ba3In2O6,0.8592,-2.4764,0.977,DFT_PBE_U
+V_Ba,1,0,8.4077,,,,,,,Ba3In2O6,0.8592,-2.4764,0.977,DFT_PBE_U

@@ -1,0 +1,49 @@
+data_image0
+_chemical_formula_structural       OAl7O6AlO7Sr2
+_chemical_formula_sum              "O14 Al8 Sr2"
+_cell_length_a       5.6005
+_cell_length_b       8.02295
+_cell_length_c       8.02295
+_cell_angle_alpha    69.2718
+_cell_angle_beta     76.7138
+_cell_angle_gamma    76.7138
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O3        1.0  0.32922  0.86640  0.38279  1.0000
+  Al  Al1       1.0  0.29592  0.74489  0.91782  1.0000
+  Al  Al1       1.0  0.79592  0.91782  0.74489  1.0000
+  Al  Al1       1.0  0.70408  0.25511  0.08218  1.0000
+  Al  Al2       1.0  0.23692  0.68142  0.56107  1.0000
+  Al  Al2       1.0  0.26308  0.43893  0.31858  1.0000
+  Al  Al2       1.0  0.76308  0.31858  0.43893  1.0000
+  Al  Al2       1.0  0.73692  0.56107  0.68142  1.0000
+  O   O1        1.0  0.25000  0.47509  0.52491  1.0000
+  O   O1        1.0  0.75000  0.52491  0.47509  1.0000
+  O   O2        1.0  0.95266  0.08078  0.15757  1.0000
+  O   O2        1.0  0.54734  0.84243  0.91922  1.0000
+  O   O2        1.0  0.04734  0.91922  0.84243  1.0000
+  O   O2        1.0  0.45266  0.15757  0.08078  1.0000
+  Al  Al1       1.0  0.20408  0.08218  0.25511  1.0000
+  O   O3        1.0  0.17078  0.61721  0.13360  1.0000
+  O   O3        1.0  0.67078  0.13360  0.61721  1.0000
+  O   O3        1.0  0.82922  0.38279  0.86640  1.0000
+  O   O4        1.0  0.90530  0.74415  0.63669  1.0000
+  O   O4        1.0  0.59470  0.36331  0.25585  1.0000
+  O   O4        1.0  0.09470  0.25585  0.36331  1.0000
+  O   O4        1.0  0.40530  0.63669  0.74415  1.0000
+  Sr  Sr1       1.0  0.25000  0.18910  0.81090  1.0000
+  Sr  Sr1       1.0  0.75000  0.81090  0.18910  1.0000

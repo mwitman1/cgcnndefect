@@ -1,0 +1,4 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Sr,1,0,8.5691,,,,,,,Fe1O3Sr1,0.0467,-2.2658,3.412,DFT_PBE_U
+V_O,1,0,0.934,,,,,,,Fe1O3Sr1,0.0467,-2.2658,3.412,DFT_PBE_U
+V_Fe,1,0,6.1683,,,,,,,Fe1O3Sr1,0.0467,-2.2658,3.412,DFT_PBE_U

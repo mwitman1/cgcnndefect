@@ -1,0 +1,8 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_O,3,0,2.2623,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_O,2,0,2.8479,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_O,4,0,0.975,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_O,1,0,2.6054,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_Fe,1,0,6.5989,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_Ba,2,0,6.8583,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U
+V_Ba,1,0,6.3329,,,,,,,Ba3Fe1O5,0.2794,-2.5461,4.781,DFT_PBE_U

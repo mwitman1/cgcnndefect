@@ -1,0 +1,39 @@
+data_image0
+_chemical_formula_structural       Al4Fe2O8
+_chemical_formula_sum              "Al4 Fe2 O8"
+_cell_length_a       5.8413
+_cell_length_b       5.84482
+_cell_length_c       5.77073
+_cell_angle_alpha    60.3782
+_cell_angle_beta     60.4391
+_cell_angle_gamma    59.1827
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Al  Al1       1.0  0.62500  0.62500  0.12500  1.0000
+  Al  Al1       1.0  0.62500  0.62500  0.62500  1.0000
+  Al  Al1       1.0  0.62500  0.12500  0.62500  1.0000
+  Al  Al1       1.0  0.12500  0.62500  0.62500  1.0000
+  Fe  Fe1       1.0  0.00000  1.00000  1.00000  1.0000
+  Fe  Fe1       1.0  0.25000  0.25000  0.25000  1.0000
+  O   O1        1.0  0.85736  0.85695  0.86468  1.0000
+  O   O1        1.0  0.85695  0.85736  0.42101  1.0000
+  O   O1        1.0  0.86468  0.42101  0.85736  1.0000
+  O   O1        1.0  0.42101  0.86468  0.85695  1.0000
+  O   O1        1.0  0.82899  0.38532  0.39305  1.0000
+  O   O1        1.0  0.38532  0.82899  0.39264  1.0000
+  O   O1        1.0  0.39305  0.39264  0.82899  1.0000
+  O   O1        1.0  0.39264  0.39305  0.38532  1.0000

@@ -1,0 +1,9 @@
+defectname,site,charge,dH_eV,2+/1+,1+/0,0/1-,1-/2-,2-/3-,3-/4-,formula,bandgap_eV,dH_eV_per_atom,electron_effective_mass,level_theory
+V_Ti,1,0,15.6105,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_O,3,0,4.1145,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_O,5,0,4.7203,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_O,2,0,4.0504,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_O,4,0,3.9906,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_O,1,0,4.4726,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_In,2,0,8.749,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U
+V_In,1,0,8.4837,,,,,,,In2O5Ti1,1.9703,-2.3984,1.247,DFT_PBE_U

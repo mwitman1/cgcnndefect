@@ -1,0 +1,49 @@
+data_image0
+_chemical_formula_structural       BaMn3Ba4MnBa3O12
+_chemical_formula_sum              "Ba8 Mn4 O12"
+_cell_length_a       5.95623
+_cell_length_b       6.57747
+_cell_length_c       12.8125
+_cell_angle_alpha    88.3875
+_cell_angle_beta     86.4377
+_cell_angle_gamma    63.0775
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ba  Ba2       1.0  0.36793  0.21002  0.97610  1.0000
+  Mn  Mn1       1.0  0.96076  0.99382  0.06926  1.0000
+  Mn  Mn1       1.0  0.51647  0.00620  0.73513  1.0000
+  Mn  Mn1       1.0  0.52267  0.99379  0.23512  1.0000
+  Ba  Ba1       1.0  0.80025  0.41222  0.75187  1.0000
+  Ba  Ba1       1.0  0.21248  0.58779  0.25187  1.0000
+  Ba  Ba1       1.0  0.26482  0.41217  0.55249  1.0000
+  Ba  Ba1       1.0  0.67699  0.58781  0.05249  1.0000
+  Mn  Mn1       1.0  0.95459  0.00618  0.56926  1.0000
+  Ba  Ba2       1.0  0.57797  0.78997  0.47610  1.0000
+  Ba  Ba2       1.0  0.10929  0.79001  0.82828  1.0000
+  Ba  Ba2       1.0  0.89932  0.20999  0.32827  1.0000
+  O   O1        1.0  0.55997  0.80348  0.86675  1.0000
+  O   O1        1.0  0.36340  0.19650  0.36674  1.0000
+  O   O1        1.0  0.91731  0.19655  0.93765  1.0000
+  O   O1        1.0  0.11385  0.80344  0.43765  1.0000
+  O   O2        1.0  0.74392  0.34650  0.53328  1.0000
+  O   O2        1.0  0.09041  0.65351  0.03329  1.0000
+  O   O2        1.0  0.73333  0.65347  0.27111  1.0000
+  O   O2        1.0  0.38685  0.34653  0.77111  1.0000
+  O   O3        1.0  0.63396  0.20928  0.15219  1.0000
+  O   O3        1.0  0.84324  0.79074  0.65219  1.0000
+  O   O4        1.0  0.23110  0.01501  0.65221  1.0000
+  O   O4        1.0  0.24610  0.98501  0.15221  1.0000

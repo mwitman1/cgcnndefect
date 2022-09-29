@@ -1,0 +1,47 @@
+data_image0
+_chemical_formula_structural       CeO14Ce3La4
+_chemical_formula_sum              "Ce4 O14 La4"
+_cell_length_a       8.00066
+_cell_length_b       8.00066
+_cell_length_c       8.00066
+_cell_angle_alpha    60
+_cell_angle_beta     60
+_cell_angle_gamma    60
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Ce  Ce1       1.0  0.62500  0.62500  0.62500  1.0000
+  O   O1        1.0  0.96906  0.53094  0.53094  1.0000
+  O   O1        1.0  0.53094  0.53094  0.96906  1.0000
+  O   O1        1.0  0.96906  0.53094  0.96906  1.0000
+  O   O1        1.0  0.28095  0.28094  0.71906  1.0000
+  O   O1        1.0  0.53094  0.96906  0.96906  1.0000
+  O   O1        1.0  0.96906  0.96906  0.53094  1.0000
+  O   O1        1.0  0.71905  0.28095  0.71905  1.0000
+  O   O1        1.0  0.71906  0.71906  0.28094  1.0000
+  O   O1        1.0  0.28095  0.71906  0.28094  1.0000
+  O   O1        1.0  0.28094  0.71906  0.71906  1.0000
+  O   O1        1.0  0.53094  0.96906  0.53094  1.0000
+  O   O2        1.0  1.00000  0.00000  0.00000  1.0000
+  O   O2        1.0  0.25000  0.25000  0.25000  1.0000
+  O   O1        1.0  0.71906  0.28095  0.28094  1.0000
+  Ce  Ce1       1.0  0.62500  0.62500  0.12500  1.0000
+  Ce  Ce1       1.0  0.62500  0.12500  0.62500  1.0000
+  Ce  Ce1       1.0  0.12500  0.62500  0.62500  1.0000
+  La  La1       1.0  0.12500  0.12500  0.12500  1.0000
+  La  La1       1.0  0.12500  0.12500  0.62500  1.0000
+  La  La1       1.0  0.12500  0.62500  0.12500  1.0000
+  La  La1       1.0  0.62500  0.12500  0.12500  1.0000

@@ -1,0 +1,43 @@
+data_image0
+_chemical_formula_structural       OBa3In4BaO9
+_chemical_formula_sum              "O10 Ba4 In4"
+_cell_length_a       6.06181
+_cell_length_b       6.24019
+_cell_length_c       9.49614
+_cell_angle_alpha    109.184
+_cell_angle_beta     108.615
+_cell_angle_gamma    89.9994
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  O   O1        1.0  0.22890  0.73666  0.98286  1.0000
+  Ba  Ba1       1.0  0.87708  0.37346  0.78180  1.0000
+  Ba  Ba1       1.0  0.37710  0.90834  0.78180  1.0000
+  Ba  Ba1       1.0  0.59530  0.09167  0.21820  1.0000
+  In  In1       1.0  0.49165  0.50003  0.00000  1.0000
+  In  In1       1.0  0.99165  0.00003  0.00000  1.0000
+  In  In2       1.0  0.71045  0.68457  0.50000  1.0000
+  In  In2       1.0  0.21045  0.31540  0.50000  1.0000
+  Ba  Ba1       1.0  0.09531  0.62653  0.21820  1.0000
+  O   O1        1.0  0.24605  0.26337  0.01714  1.0000
+  O   O1        1.0  0.74602  0.25378  0.01713  1.0000
+  O   O1        1.0  0.72891  0.74623  0.98287  1.0000
+  O   O2        1.0  0.65467  0.69453  0.27562  1.0000
+  O   O2        1.0  0.37919  0.30545  0.72437  1.0000
+  O   O2        1.0  0.87919  0.91895  0.72437  1.0000
+  O   O2        1.0  0.15468  0.08103  0.27562  1.0000
+  O   O3        1.0  0.86691  0.38131  0.50002  1.0000
+  O   O3        1.0  0.36691  0.61866  0.50000  1.0000

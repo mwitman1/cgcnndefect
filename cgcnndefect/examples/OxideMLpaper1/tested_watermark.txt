@@ -1,0 +1,21 @@
+Last updated: 2022-09-29T15:25:05.106502-07:00
+
+Python implementation: CPython
+Python version       : 3.9.7
+IPython version      : 7.24.1
+
+Compiler    : Clang 11.0.0 (clang-1100.0.33.17)
+OS          : Darwin
+Release     : 20.6.0
+Machine     : x86_64
+Processor   : i386
+CPU cores   : 12
+Architecture: 64bit
+pymatgen : 2022.9.21
+ase      : 3.22.0
+torch    : 1.9.0
+numpy    : 1.23.1
+sklearn  : 0.0
+watermark: 2.3.1
+Name: scikit-learn
+Version: 0.24.2
