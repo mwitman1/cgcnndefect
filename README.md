@@ -1,10 +1,44 @@
-# Personal and defect modifications to CGCNN
+# CGCNN for directly predicting relaxed vacancy formation enthalpies
 
-Modifications for predicting defects and other various personal modifications have been made to make some tasks easier: cross-validation, running on cluster, etc.
+Modifications for predicting defects and other various modifications have been made to make some tasks easier: cross-validation, running on cluster, etc. 
 
-### Installable package
-To install as a package use
+## System requirements:
+Python3, pip3 (python package manager), and command line execution of python programs on MacOS, Linux, or Windows
+
+## Tested architecture and package versions:
+```
+Last updated: 2022-09-29T15:25:05.106502-07:00
+
+Python implementation: CPython
+Python version       : 3.9.7
+IPython version      : 7.24.1
+
+Compiler    : Clang 11.0.0 (clang-1100.0.33.17)
+OS          : Darwin
+Release     : 20.6.0
+Machine     : x86_64
+Processor   : i386
+CPU cores   : 12
+Architecture: 64bit
+pymatgen : 2022.9.21
+ase      : 3.22.0
+torch    : 1.9.0
+numpy    : 1.23.1
+sklearn  : 0.0 
+watermark: 2.3.1
+Name: scikit-learn
+Version: 0.24.2
+```
+
+
+## Installation guide
+First clone the repository 
+```
+git clone --single-branch --branch Paper1 https://github.com/mwitman1/cgcnndefect
+```
+To install the package, please use:
 ```bash
+cd cgcnndefect
 pip install -e .
 ```
 which allows you to then execute training or prediction tasks from anywhere using the command line:
@@ -12,20 +46,175 @@ which allows you to then execute training or prediction tasks from anywhere usin
 cgcnn-defect-train $flags
 cgcnn-defect-predict $flags
 ```
+Install time is a few seconds.
 
-### Various CL args
-Can control target files via CL args to facilitate high-throughput execution across different encoding strategies, cross-validation, etc.
+## Demo
+The training data files from the full data repository (https://zenodo.org/record/5999073) has been provided in the examples directory:
+```
+cgcnndefect/examples/OxideMLpaper1
+```
+Specifically, all input files needed to run the defect CGCNN code have already been prepared in: 
+```
+cgcnndefect/examples/OxideMLpaper1/cgcnn
+```
+These have been prepared from output DFT data provided in (*/mags, */poscars, */csvs, */oxstate).
+
+The ```cgcnn``` directory contains a python script to check your watermark and a bash script to execute a demo of the training and validation procedure  in ```execute_example_train_and_test.sh```:
+
+
+```bash
+#! /bin/bash
+
+# This example script shows how to use the defect CGCNN code, modified to directly 
+# predict relaxed defect formation enthalpies from a host crystal structure.
+# For details on methodology, please see the preprint: 
+# Witman, Goyal, Ogitsu, McDaniel, Lany. ChemRXiv, 10.26434/chemrxiv-2022-frcns.
+
+# For examples on how to:
+# -automate bash scripting to run all cross-validations, encoding types, etc.
+# -post-process all validation data
+# -use additional DFT validation data on known water-splitting compounds
+# -use the models to screen the Materials Project
+# -post-process all screening data
+# as demonstrated in the preprint, please see the Zenodo repository:
+# Witman, Goyal, Ogitsu, McDaniel, Lany. Zenodo, 10.5281/zenodo.5999073
+
+# This example can be adapted via the following which are
+# used to validate the model, test different encoding strategies, etc.
+# 1. fraction of data made available [0.10, 0.40, or 1.00]
+# 2. choice of how to initially encode node features based only on element id  [atom_init.json.*]
+# 3. choice of adding (computed, site-specific) oxidation states to node features (*.locals)
+# 4. choice of adding computed host properties to defect node feature vector (*.globals)
+
+# Training hyperparameters that are constant across all models
+# production models should be trained for 1000 epochs with the best model determined by early stopping
+hyperparam_flags="--h-fea-len 16 --atom-fea-len 8 --n-conv 2 --epochs 1000 --lr 0.05 --optim Adam --n-h 2 --disable-cuda --test-ratio 0.02 --seed 1000"
+
+function makedir {
+    if [ ! -d ./$1 ]
+    then
+        mkdir ./$1
+    fi
+}
+
+cd cgcnn
+
+    ######################################################################################
+    # 1. This trains a model for:
+    ######################################################################################
+
+    # atom_init.json contains the original onehot encoding of elemental properties for initial node features
+    # *.locals contains the onehot encoding of specific atom site features, e.g. oxidation states, for each structure
+    # *.globals contains the host compound features (e.g. dH_f, e- effective mass, band gap) for each structure
+    encode_type="_ve_vg_vs" # (elemental, global, and oxidation state features)
+    encode_flags="--init-embed-file atom_init.json --atom-spec locals --crys-spec globals" 
+
+    # Using all available data and train the k=0 model of the defectwise, K=10 CV scheme
+    train_struct_flag="--csv-ext .train_1.00k0"
+
+    # Save the model to the corresponding location
+    resultdir="model-1.00k0""$encode_type" && makedir $resultdir
+    resultdir_flag="--resultdir ""$resultdir"
+
+    printf '\n*************\nTraining Model 1\n*************\n\n'
+    # Note this command writes test results to test_results.csv
+    cgcnn-defect-train . $hyperparam_flags $encode_flags $train_struct_flag $resultdir_flag
+
+
+    ######################################################################################
+    # 2. Then validates on the corresponding hold out set:
+    ######################################################################################
+
+    hold_struct_flag="--csv-ext .hold_1.00k0"
+    model_loc_flag="$resultdir"/model_best.pth.tar
+    data_loc_flag="."
+    CIFfeaturizer_loc_flag="-CIFdatapath "$resultdir"/dataset.pth.tar"
+
+    printf '\n*************\nValidating Model 1\n*************"\n\n'
+    # Note this command writes test results to all_results.csv
+    cgcnn-defect-predict $model_loc_flag $data_loc_flag $CIFfeaturizer_loc_flag $hold_struct_flag $resultdir_flag --disable-cuda
+
+    ######################################################################################
+    # 3. This trains a model similar to the above, with the exception that the train/test
+    # stratification has been perfomed structurewise/compoundwise (not defectwise)
+    ######################################################################################
+
+    encode_type="_struct_ve_vg_vs"
+    encode_flags="--init-embed-file atom_init.json --atom-spec locals --crys-spec globals" 
+    resultdir="model-1.00k0""$encode_type" && makedir $resultdir
+    resultdir_flag="--resultdir ""$resultdir"
+    train_struct_flag="--csv-ext .train_1.00k0_struct"
+
+    printf '\n*************\nTraining Model 2\n*************\n\n'
+    # Note this command writes test results to test_results.csv
+    cgcnn-defect-train . $hyperparam_flags $encode_flags $train_struct_flag $resultdir_flag
+
+
+    ######################################################################################
+    # 4. Then validates on the corresponding hold out set:
+    ######################################################################################
+
+    hold_struct_flag="--csv-ext .hold_1.00k0_struct"
+    model_loc_flag="$resultdir"/model_best.pth.tar
+    data_loc_flag="."
+    CIFfeaturizer_loc_flag="-CIFdatapath "$resultdir"/dataset.pth.tar"
+
+    printf '\n*************\nValidating Model 2\n*************\n\n'
+    # Note this command writes test results to all_results.csv
+    cgcnn-defect-predict $model_loc_flag $data_loc_flag $CIFfeaturizer_loc_flag $hold_struct_flag $resultdir_flag --disable-cuda
+    
+cd ..
+```
+
+Executed on a typical desktop this training may take up to around an hour. The progress of the training will be output to the console, and you can expect to see
+```
+*************
+Validating Model 1
+*************
+
+=> loading model 'model-1.00k0_ve_vg_vs/model_best.pth.tar'
+=> loaded model 'model-1.00k0_ve_vg_vs/model_best.pth.tar' (epoch 763, validation 0.4224497079849243)
+Test: [0/1]	Time 2.282 (2.282)	Loss 0.0869 (0.0869)	MAE 0.547 (0.547)
+ ** MAE 0.547
+```
+
+and
+
+```
+*************
+Validating Model 2
+*************
+
+=> loading model 'model-1.00k0_struct_ve_vg_vs/model_best.pth.tar'
+=> loaded model 'model-1.00k0_struct_ve_vg_vs/model_best.pth.tar' (epoch 108, validation 0.4658649265766144)
+Test: [0/1]	Time 3.051 (3.051)	Loss 0.0523 (0.0523)	MAE 0.525 (0.525)
+ ** MAE 0.525
+```
+
+Note these test results are inclusive of O and non-O defects (as evident from the structure names in the */all_results.csv file).
+
+
+## Advanced use instructions
+
+Most of the advanced instructions for CGCNN use can be found in the original README (see below). Here are a few details to assist with using the modifications in this repository to reproduce the results in (https://chemrxiv.org/engage/chemrxiv/article-details/628bdf9f87d01f60fcefa355). Note the large number of model trainings needed to cross-validate and test the different model types will require significant compute time and will be best performed on an HPC system or a powerful desktop with a large number of CPUs. All defect data, the training/validation bash scripts that execute this code, and jupyter notebooks for post-processing the training and materials screening data are provided in the Zenodo repository (https://zenodo.org/record/5999073).   
+
+### Managing cross-validation
+The data has already been split for the various K-fold cross validations in ```id_prop.csv.*```. Structures supplied during training (```cgcnn-defect-train $flags```) or inference (```cgcnn-defect-predict $flags```) can be controlled via the flag:
+```bash
+--csv-ext .your_csv_ext
+```
+Note (0.10, 0.4, 1.00) means using 10, 40, or 100% of the available data, k{0..9} is the particular fold, "train" is the split used for train/validation splits with early stopping, and "hold" is the hold out split used for final model accuracy evaluation. A "_struct" indicates that the splits were generated structurewise/compoundwise, i.e., defects from the same structure must be only in either the "train" or "hold" split. 
+
+### Defect modifications
+In this version, the pooling function has been *hard coded* to only extract the feature vector of the node at index i=0 (the atom to be defected). This will be updated in the development branch and in future releases to be more efficient and flexible.
+
+### Initial feature encoding
+One can investigate the performance of different initial feature encoding schemes: initial node features are based on elemental properties encoded in various ways (```atom_init.json.*```), addition of node-specific properties like oxidation states (data in ```*.locals```), or global crystal features (data in ```*.globals```)
+
 - To change elemenent encoding file
 ```bash
 --init-embed-file $your_atom_init.json
 ```
-- To change the default id_prop.csv file of (structure,property) data to id_prop.csv.your_csv_ext:
-```bash
---csv-ext .your_csv_ext
-```
-
-### Defect modifications
-- Pooling function has been hard coded to only extract the feature vector of the node at index i=0 (the atom to be defected). In progress: this will be made a lot more efficient in the future by specifying the index from the CL and not needing multiple CIF files for all unique defects within a given host structure
 - For a given structure1.cif, can introduce local node attributes (e.g. oxidation state) contained in structure1.cif.locals at the graph encoding stage via:
 ```bash
 --atom-spec locals
@@ -34,7 +223,6 @@ Can control target files via CL args to facilitate high-throughput execution acr
 ```bash
 --crys-spec globals
 ``` 
-- EXPERIMENTAL: can use a local convolution block based on spherical harmonics (at the cost of higher model complexity)
 
 ### How to cite
 
