@@ -270,9 +270,16 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
                 #test_pred = normalizer.denorm(output.data.cpu()) #<-Fxyz mod
                 test_pred = normalizer.denorm(output[0].data.cpu())+crys_rep_ener
                 test_target = target
-                test_preds += test_pred.view(-1).tolist()
-                test_targets += test_target.view(-1).tolist()
+                if output[0].shape[1]>1:
+                    test_preds += test_pred.tolist()
+                else:
+                    test_preds += test_pred.view(-1).tolist()
+                if output[0].shape[1]>1:
+                    test_targets += test_target.tolist()
+                else:
+                    test_targets += test_target.view(-1).tolist()
                 test_cif_ids += batch_cif_ids
+
         elif model_args.task == 'Fxyz':
             mae_error = mae(normalizer.denorm(output[0].data.cpu()), target)
             mae_Fxyz_error = mae(normalizer_Fxyz.denorm(output[1].data.cpu()),
@@ -350,7 +357,12 @@ def validate(val_loader, model, criterion, normalizer, normalizer_Fxyz, test=Fal
             writer = csv.writer(f)
             for cif_id, target, pred in zip(test_cif_ids, test_targets,
                                             test_preds):
-                writer.writerow((cif_id, target, pred))
+                print(target,pred)
+                if isinstance(target,list):
+                    writer.writerow((cif_id, *target, *pred))
+                else:
+                    writer.writerow((cif_id, target, pred))
+                    
         if model_args.task == 'Fxyz':                                                 
             with open(os.path.join(args.resultdir,'all_results_Fxyz.csv'), 'w') as f:
                 for cif_id, target_Fxyz, pred_Fxyz in zip(test_cif_ids,
