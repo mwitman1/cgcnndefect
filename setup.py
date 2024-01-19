@@ -14,7 +14,7 @@ setup(name='cgcnndefect',
         'ase',
         'torch',
         'numpy',
-        'sklearn',
+        'scikit-learn',
       ],
       entry_points={
           'console_scripts': ['cgcnn-defect-train=cgcnndefect.command_line_train:main',

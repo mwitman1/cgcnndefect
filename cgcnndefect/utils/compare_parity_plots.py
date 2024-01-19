@@ -58,7 +58,10 @@ def plot(files, labels=None, predtype=('E','eV')):
         colors += [DEFCOLS[i] for _ in range(len(df['actual']))]
         structs += list(df['struct'])
         batch += [i for _ in range(len(df['actual']))]
-        ns += [struct.split('-')[2][1:] for struct in list(df['struct'])]
+        try:
+            ns += [struct.split('-')[2][1:] for struct in list(df['struct'])]
+        except:
+            ns += [0 for struct in list(df['struct'])]
 
     xdata = np.array(xdata,dtype=float)
     ydata = np.array(ydata,dtype=float)
@@ -141,36 +144,43 @@ def plot(files, labels=None, predtype=('E','eV')):
                          np.array(df_all['predicted'],dtype=float))/\
                   np.array(df_all['predicted'],dtype=float)))
 
+    ylim = ax[1].get_ylim()
+
+    ax[1].plot([-0.04,-0.04],ylim,c='red')
+    ax[1].plot([0.04,0.04],ylim,c='red')
+    ax[1].plot([-0.02,-0.02],ylim,c='green')
+    ax[1].plot([0.02,0.02],ylim,c='green')
+
     plt.show()
     plt.close()
 
   
-    # https://plotly.com/python/line-and-scatter/ 
-    # https://stackoverflow.com/questions/65124833/plotly-how-to-combine-scatter-and-line-plots-using-plotly-express
-    fig1 = px.scatter(df_all, x="actual", y="predicted", hover_data=['struct'],color='ns')
-    fig2 = px.line(df_yeqx, x='x', y='y')
-    fig3 = go.Figure(data=fig1.data + fig2.data)
+    ## https://plotly.com/python/line-and-scatter/ 
+    ## https://stackoverflow.com/questions/65124833/plotly-how-to-combine-scatter-and-line-plots-using-plotly-express
+    #fig1 = px.scatter(df_all, x="actual", y="predicted", hover_data=['struct'],color='ns')
+    #fig2 = px.line(df_yeqx, x='x', y='y')
+    #fig3 = go.Figure(data=fig1.data + fig2.data)
 
-    #fig = go.Figure()
-    #fig.add_trace(go.Scatter(
-    #    x=df_all["actual"], 
-    #    y=df_all["predicted"], 
-    #    mode='markers',
-    #    marker=dict(color=df_all['batch']),
-    #    text=df_all['batch']
-    #))
-    #fig.add_trace(go.Scatter(
-    #    x=[min_act_energy,max_act_energy],
-    #    y=[min_act_energy,max_act_energy],
-    #    marker=dict(color='black'),
-    #    mode='lines'
-    #))
-    fig3.update_layout(
-         #title=r'Defect-CGCNN vs. DFT predictions of $\Delta H_{f,d}$',
-         xaxis_title = r'%s (DFT) [%s]'%(predtype[0],predtype[1]),
-         yaxis_title = r'%s (Model) [%s]'%(predtype[0],predtype[1]))
+    ##fig = go.Figure()
+    ##fig.add_trace(go.Scatter(
+    ##    x=df_all["actual"], 
+    ##    y=df_all["predicted"], 
+    ##    mode='markers',
+    ##    marker=dict(color=df_all['batch']),
+    ##    text=df_all['batch']
+    ##))
+    ##fig.add_trace(go.Scatter(
+    ##    x=[min_act_energy,max_act_energy],
+    ##    y=[min_act_energy,max_act_energy],
+    ##    marker=dict(color='black'),
+    ##    mode='lines'
+    ##))
+    #fig3.update_layout(
+    #     #title=r'Defect-CGCNN vs. DFT predictions of $\Delta H_{f,d}$',
+    #     xaxis_title = r'%s (DFT) [%s]'%(predtype[0],predtype[1]),
+    #     yaxis_title = r'%s (Model) [%s]'%(predtype[0],predtype[1]))
 
-    fig3.show()
+    #fig3.show()
 
 if __name__ == "__main__":
 

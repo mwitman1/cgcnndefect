@@ -1,4 +1,3 @@
 [console_scripts]
 cgcnn-defect-predict = cgcnndefect.command_line_predict:main
 cgcnn-defect-train = cgcnndefect.command_line_train:main
-
